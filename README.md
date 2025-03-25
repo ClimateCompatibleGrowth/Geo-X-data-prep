@@ -23,7 +23,7 @@ You can install these requirements in a new environment using `mamba` package an
 
 This new environment can be activated using:
 
-`.../Geo-X-data-prep % mamba activate data-prep`
+`.../Geo-X-data-prep % mamba activate prep`
 
 Make sure to deactivate the environment before proceeding to the next step.
 
@@ -32,7 +32,7 @@ You will need to create a separate environment for the SPIDER submodule to work.
 
 Firstly, navigate to the `ccg-spider/prep` folder:
 
-`.../GeoX-data-prep % cd ccg-spider/prep`
+`.../Geo-X-data-prep % cd ccg-spider/prep`
 
 Next, create a new environment using your package and environment manager. Below shows how using `mamba`:
 
@@ -139,7 +139,8 @@ The above will combine the SPIDER and GLAES files, creating `[Country]_hex_final
 The final files will be saved as `hex_final_[ISOCode].geojson` in the `inputs_geox/data` folder.
 
 This can be placed into a copy of the `Geo-X` repository as the baseline input data for modelling. 
-If you set `hydro` to True, a `hydropower_dams.gpkg` file for each country will be generated into the `ccg-spider/prep/data` folder. These files must be placed into the `data/hydro` folder of your `Geo-X` repository.
+
+If you set `hydro` to True, a `[CountryName]_hydropower_dams.gpkg` file for each country will be generated into the `ccg-spider/prep/data` folder. These files must be placed into the `data/hydro` folder of your `Geo-X` repository.
 
 ## Additional notes (Recommended to read at least once)
 As the runs progress, you may not see all the files being generated, but rest assured they are there, taking up space. Once the runs are finished, it's recommended to save the necessary files and review the listed folders to delete any unnecessary files in order to free up space:

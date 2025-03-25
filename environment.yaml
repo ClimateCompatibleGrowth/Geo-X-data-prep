@@ -1,4 +1,4 @@
-name: data-prep
+name: prep
 channels:
   - conda-forge
   - nodefaults
@@ -15,5 +15,5 @@ dependencies:
   - conda-forge::numpy<1.24
   - conda-forge::scipy
   - conda-forge::scikit-learn
-  - conda-forge::geokit>=1.4.0
+  - conda-forge::geokit=1.4.0
   - conda-forge::gdal=3.4.*

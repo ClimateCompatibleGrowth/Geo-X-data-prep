@@ -157,16 +157,15 @@ if __name__ == "__main__":
 
     # create a for loop that can loop through a list of country names
     for country_name in country_names:
-
-        print(f"Combining GLAES and SPIDER data for {country_name}!")
-
         # Get country names without accents, spaces, apostrophes, or periods for loading files
         country_name_clean = clean_country_name(country_name)
 
+        print(f"Combining GLAES and SPIDER data for {country_name_clean}!")
+
         # Get paths
         hex_path = os.path.join(dirname, "ccg-spider", "prep", f"{country_name_clean}_hex.geojson")
-        wind_path = os.path.join(dirname, "inputs_glaes", "processed", f"{country_name}_turbine_placements.shp")
-        pv_path = os.path.join(dirname, "inputs_glaes", "processed", f"{country_name}_pv_placements.shp")
+        wind_path = os.path.join(dirname, "inputs_glaes", "processed", f"{country_name_clean}_turbine_placements.shp")
+        pv_path = os.path.join(dirname, "inputs_glaes", "processed", f"{country_name_clean}_pv_placements.shp")
         save_path = os.path.join(dirname, "inputs_geox", "data", f"{country_name_clean}_hex_final.geojson")
 
         # Load all files and convert all to the country's CRS

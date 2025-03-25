@@ -164,12 +164,14 @@ if __name__ == "__main__":
 
     # create a for loop that can loop through a list of country names
     for country_name in country_names:
+        country_name_clean = clean_country_name(country_name)
+
         # Optional prep step
         if args.hydro:
-            input_path = os.path.join(data_path, f"{country_name}_hydropower_plants.csv")
+            input_path = os.path.join(data_path, f"{country_name_clean}_hydropower_plants.csv")
             output_dir = os.path.join(dirname, 'ccg-spider', 'prep', 'data')
             os.makedirs(output_dir, exist_ok=True) 
-            output_path = os.path.join(output_dir, "hydropower_dams.gpkg")
+            output_path = os.path.join(output_dir, f"{country_name_clean}_hydropower_dams.gpkg")
 
             # Read data from CSV
             data = pd.read_csv(input_path)
@@ -207,12 +209,10 @@ if __name__ == "__main__":
 
 
         # First prep step
-        print("Prepping spider and glaes data files for " + country_name + "...")
-
-        country_name_clean = clean_country_name(country_name)
+        print("Prepping spider and glaes data files for " + country_name_clean + "...")
 
         # Grab country boundaries
-        country = countries.loc[[f'{country_name}'], :]
+        country = countries.loc[[f'{country_name_clean}'], :]
 
         # Caculating glaes data files
         # Calculate UTM zone based on representative point of country
@@ -279,13 +279,13 @@ if __name__ == "__main__":
 
 
         # Second prep step
-        print("Calculating land exclusions for " + country_name)
+        print("Calculating land exclusions for " + country_name_clean)
 
         # Load the pickled EPSG code for the country
-        with open(os.path.join(glaes_data_path, f'{country_name}_EPSG.pkl'), 'rb') as file:
+        with open(os.path.join(glaes_data_path, f'{country_name_clean}_EPSG.pkl'), 'rb') as file:
             EPSG = pickle.load(file)
 
-        calculating_exclusions(glaes_data_path, country_name, EPSG, glaes_processed_path, turbine_radius)
+        calculating_exclusions(glaes_data_path, country_name_clean, EPSG, glaes_processed_path, turbine_radius)
         print("Finished calulcating land exclusions!")
      
 
