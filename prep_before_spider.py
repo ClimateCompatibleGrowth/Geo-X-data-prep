@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Oct 18 14:30:10 2023
+Created on Mon Mar 10 2025
 
 @author: Alycia Leonard, University of Oxford
 
@@ -8,23 +8,23 @@ prep_before_spider.py
 
 This script does three main prep steps and one optional prep step.
 
-If hydropower is required, then this script will prepare raw spatial data for 
-hexagon preparation in SPIDER by creating a geopackage file.
-The outputs are saved in /ccg-spider/prep/data.
+If hydropower is required, then this script will prepare data for hexagon 
+preparation in SPIDER in the form of a geopackage file.
+The outputs are saved to /ccg-spider/prep/data.
 
-Firstly, it prepares raw spatial data for land exclusion in GLAES and hexagon 
-preparation in SPIDER.
-The raw inputs should be downloaded to /Raw_Spatial_Data before execution.
+Firstly, it prepares data for land exclusion in GLAES, and hexagon preparation 
+in SPIDER.
+The raw inputs should be downloaded to /data before execution.
 The outputs are saved in /glaes/data and /ccg-spider/prep/data respectively.
 
-Secondly, it implements land exclusions for the countries defined in the list
-'country_names'.
-It then allocates PV and wind installations over the allowed area
-The outputs are saved as .shp files.
+Secondly, using GLAES, it implements land exclusions for the countries defined 
+in the list 'country_names', and allocates PV and wind installations over the 
+allowed area.
+The outputs are saved as .shp files in /input_glaes/processed.
 
 Lastly, this script makes SPIDER configs for each country in the 'country_names'
 list.
-It saves these files as "'country_name'_config.yml" under ccg-spider/prep.
+It saves these files as "[CountryName]_config.yml" under ccg-spider/prep.
 
 """
 
@@ -48,18 +48,19 @@ def calculating_exclusions(glaes_data_path, country_name, EPSG,
     """
     Calculating exclusions using glaes.
 
+    ...
     Parameters
     ----------
-    glaes_data_path : str
+    glaes_data_path : string
         Path to the folder where some files should be saved.
-    country_name : str
+    country_name : string
         Name of country for file names.
-    EPSG : int
+    EPSG : integer
         Unique identifier representing coordinate systems and other geodetic 
         properties.
-    glaes_processed_path : str
+    glaes_processed_path : string
         Path to the folder where some files should be saved.
-    turbine_radius : int
+    turbine_radius : integer
         Turbine radius in meters used for spacing.
     """
     print(" - Initializing exclusion calculator...")
@@ -94,19 +95,20 @@ def calculating_exclusions(glaes_data_path, country_name, EPSG,
 
 def replace_country(node, country_name):
     """
-    Recursively replaces "Country" with the country name provided
+    Recursively replaces "Country" with the country name provided.
 
+    ...
     Parameters
     ----------
-    node : dict
-        File contents that need to have "Country" replaced witht the country
+    node : dictionary
+        File contents that need to have "Country" replaced with the country
         name provided.
-    country_name : str
+    country_name : string
         Name of country to be used as replacement.
 
     Returns
     -------
-    node : dict
+    node : dictionary
         File contents with the correct country name used.
 
     """
@@ -121,11 +123,12 @@ def replace_country(node, country_name):
         
 
 if __name__ == "__main__":
+    # Parser set-up
     parser = argparse.ArgumentParser()
     parser.add_argument('countries', nargs='+', type=str,
-                         help="<Required> Enter the country names you are prepping")
+                         help="<Required> Enter the country names you are preparing for.")
     parser.add_argument('--hydro', nargs='?', default=False, type=bool,
-                        help="<Optional> Enter True if you need hydro to be prepped for. Default is False")
+                        help="<Optional> Enter True if you need hydro to be prepared for. Default is False")
     args = parser.parse_args()
 
     # Define country name(s) to be used
@@ -162,16 +165,16 @@ if __name__ == "__main__":
     # Enercon_E126_7500kW - https://www.thewindpower.net/turbine_en_225_enercon_e126-7500.php, turbine_radius = 127
     turbine_radius = 150
 
-    # create a for loop that can loop through a list of country names
+    # Loop through a list of country names
     for country_name in country_names:
         country_name_clean = clean_country_name(country_name)
 
-        # Optional prep step
+
+        # Optional prep step - creating hydropower geopackage file
         if args.hydro:
-            input_path = os.path.join(data_path, f"{country_name_clean}_hydropower_plants.csv")
-            output_dir = os.path.join(dirname, 'ccg-spider', 'prep', 'data')
-            os.makedirs(output_dir, exist_ok=True) 
-            output_path = os.path.join(output_dir, f"{country_name_clean}_hydropower_dams.gpkg")
+            print(f"Creating Geopackage file for {country_name_clean}...")
+            input_path = os.path.join(data_path, f"{country_name_clean}_hydropower_plants.csv") 
+            output_path = os.path.join(spider_prep_data_path, f"{country_name_clean}_hydropower_dams.gpkg")
 
             # Read data from CSV
             data = pd.read_csv(input_path)
@@ -203,13 +206,11 @@ if __name__ == "__main__":
             gdf.set_crs(epsg=4326, inplace=True)
             gdf.to_file(output_path, layer='dams', driver="GPKG")
 
-            # Display where the file is stored (relative path)
-            relative_output_path = os.path.relpath(output_path, dirname)
-            print(f"GeoPackage file successfully created at: {relative_output_path}")
+            print(f"GeoPackage file successfully created for {country_name_clean}\n")
 
 
-        # First prep step
-        print("Prepping spider and glaes data files for " + country_name_clean + "...")
+        # Step 1 - preparing files for glaes and spider
+        print(f"Preparing spider and glaes data files for {country_name_clean}...")
 
         # Grab country boundaries
         country = countries.loc[[f'{country_name_clean}'], :]
@@ -254,7 +255,7 @@ if __name__ == "__main__":
         OSM_waterways = gpd.read_file(os.path.join(OSM_country_path, 'gis_osm_waterways_free_1.shp'))
         OSM_waterways.to_file(os.path.join(spider_prep_data_path, f'{country_name_clean}_waterways.gpkg'), driver='GPKG', encoding='utf-8')
 
-        # Convert country back to EPSC 4326 to trim CLC and save this version for SPIDER as well
+        # Convert country back to EPSG 4326 to trim CLC and save this version for SPIDER as well
         country.to_crs(epsg=4326, inplace=True)
         country.to_file(os.path.join(spider_prep_data_path, f'{country_name_clean}.gpkg'), driver='GPKG', encoding='utf-8')
 
@@ -275,22 +276,22 @@ if __name__ == "__main__":
             with rasterio.open(os.path.join(glaes_data_path, f'{country_name_clean}_CLC.tif'), 'w', **out_meta) as dest:
                 dest.write(out_image)
 
-        print("Glaes and spider data files prepped!")
+        print(f"Finished preparing glaes and spider data files for {country_name_clean}\n")
 
 
-        # Second prep step
-        print("Calculating land exclusions for " + country_name_clean)
+        # Step 2 - running glaes
+        print(f"Calculating land exclusions for {country_name_clean}...")
 
         # Load the pickled EPSG code for the country
         with open(os.path.join(glaes_data_path, f'{country_name_clean}_EPSG.pkl'), 'rb') as file:
             EPSG = pickle.load(file)
 
         calculating_exclusions(glaes_data_path, country_name_clean, EPSG, glaes_processed_path, turbine_radius)
-        print("Finished calulcating land exclusions!")
+        print("Finished calulcating land exclusions\n")
      
 
-        # Final prep step
-        print(f'Prepping config file for {country_name_clean}...')
+        # Step 3 - creating spider config files
+        print(f'Preparing config file for {country_name_clean}...')
 
         current_data = replace_country(config_data, country_name_clean)
 
@@ -298,7 +299,7 @@ if __name__ == "__main__":
         with open(os.path.join(spider_prep_path, output_file), 'w', encoding='utf-8') as file:
             yaml.dump(current_data, file, default_flow_style=False, allow_unicode=True)
 
-        print(f'Config file is created and saved as "{output_file}"!')
+        print(f'Config file is created and saved as "{output_file}"')
 
 
 
