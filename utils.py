@@ -2,7 +2,9 @@
 """
 Created on Wed Mar 19 2025
 
-@author: Alycia Leonard, University of Oxford
+@authors: 
+ - Alycia Leonard, University of Oxford
+ - Samiyha Naqvi, University of Oxford
 
 utils.py
 

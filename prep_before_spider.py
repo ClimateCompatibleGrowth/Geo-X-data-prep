@@ -149,6 +149,7 @@ if __name__ == "__main__":
     spider_prep_data_path = os.path.join(dirname, 'ccg-spider', 'prep', 'data')
     glaes_processed_path = os.path.join(dirname, 'inputs_glaes', 'processed')
     spider_prep_path = os.path.join(dirname, "ccg-spider", "prep")
+    geox_final_data_path = os.path.join(dirname, "inputs_geox/final_data")
 
     # Read shapefile of countries
     countries = gpd.read_file(regionPath).set_index('NAME')
@@ -175,6 +176,7 @@ if __name__ == "__main__":
             print(f"Creating Geopackage file for {country_name_clean}...")
             input_path = os.path.join(data_path, f"{country_name_clean}_hydropower_plants.csv") 
             output_path = os.path.join(spider_prep_data_path, f"{country_name_clean}_hydropower_dams.gpkg")
+            final_data_output_path  = os.path.join(geox_final_data_path, f"{country_name_clean}_hydropower_dams.gpkg")
 
             # Read data from CSV
             data = pd.read_csv(input_path)
@@ -205,6 +207,8 @@ if __name__ == "__main__":
 
             gdf.set_crs(epsg=4326, inplace=True)
             gdf.to_file(output_path, layer='dams', driver="GPKG")
+            gdf.to_file(final_data_output_path, layer='dams', driver="GPKG")
+
 
             print(f"GeoPackage file successfully created for {country_name_clean}\n")
 

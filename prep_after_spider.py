@@ -213,7 +213,7 @@ if __name__ == "__main__":
         # May need to switch to higher res
         world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
         
-        output_hexagon_path = f"inputs_geox/data/hex_final_{args.isocodes[iso_count]}.geojson"
+        output_hexagon_path = f"inputs_geox/final_data/hex_final_{args.isocodes[iso_count]}.geojson"
         iso_count+=1
 
         hexagons_with_country = assign_country(hexagons, world)

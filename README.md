@@ -4,14 +4,14 @@ The Geo-X library requires spatial hexagon files for the area of interest with s
 These scripts are designed to assist in creating these input data. They allow users to move from raw data inputs to a Geo-X-ready hexagon input by interfacing with the Global Land Availability of Energy Systems ([GLAES](https://github.com/FZJ-IEK3-VSA/glaes/tree/master/)) and Spatially Integrated Development of Energy and Resources ([SPIDER](https://github.com/carderne/ccg-spider/tree/main)).
 
 > [!NOTE]
-> Please note that when using this codebase, users will need to modify the filenames and paths included in the scripts if new releases of the suggested data be made or if the user choose to use different/supplementary data sources.
+> Please note that when using this codebase, users will need to modify the filenames.
 ___
 ## 1 Installation instructions
 
 ### 1.1 Clone the repository and submodules
 First, clone the repository and initialise the submodules in one step:
 
-`/your/path % git clone --recurse-submodules https://github.com/ClimateCompatibleGrowth/GeoH2-data-prep.git`
+`/your/path % git clone --recurse-submodules https://github.com/ClimateCompatibleGrowth/Geo-X-data-prep.git`
 
 After cloning, navigate to the top-level folder of the repository.
 
@@ -55,7 +55,6 @@ ___
 ## 2 Preparing input data
 
 ### 2.1 Input data
-
 Before running the preparation scripts, some data must be downloaded. 
 
 - The global oceans and seas geopackage can be downloaded from: https://www.marineregions.org/downloads.php
@@ -71,7 +70,6 @@ For the global oceans and seas geopackage, please save the `goas_v01.gpkg` file 
 >Ensure that the config file you are using, either `Country_config.yml` or `Country_config_hydro.yml`, located in the `inputs_spider` folder, contains all the information you want SPIDER to use.
 
 ### 2.2 Hydropower input data (optional)
-
 If you want hydropower to be used as a generator, you will need another input file.
 It should be named `[CountryName]_hydropower_plants.csv` with the `CountryName` spelling matching those used in the Natural Earth country boundaries shapefile. In the `data` folder, there is a template that can be filled in and name updated. That is where the file must be placed.
 You can also use files from **open-source datasets** like the [Hydropower Database](https://github.com/energy-modelling-toolkit/hydro-power-database). You **must** rename the file to `[CountryName]_hydropower_plants.csv` and ensure that the column titles match those in the template file.
@@ -85,14 +83,12 @@ You can also use files from **open-source datasets** like the [Hydropower Databa
   - **Hydraulic head (m)**
 
 ## 3 Running data prep
-
 There are two main scripts that are used as well as the SPIDER submodule.
 
 >[!NOTE]
 >The two main scripts may take more than 10 minutes to complete, depending on the size of the country.
 
 ### 3.1 Run initial data prep before SPIDER
-
 Activate the `prep` environment for this step.
 
 There are some arguments that you need to pass via the terminal. They are:
@@ -139,17 +135,17 @@ The above will combine the SPIDER and GLAES files, saving `[Country]_hex_final.g
 
 It will then assign an interest rate to different hexagons for different technology categories based on their country. Lastly, this script removes the duplicated hexagons that belong to a country which are not the desired country. 
 
-The final file will be saved as `hex_final_[ISOCode].geojson` for each country in the `inputs_geox/data` folder.
+The final file will be saved as `hex_final_[ISOCode].geojson` for each country in the `inputs_geox/final_data` folder.
 
 These `hex_final_[ISOCode].geojson` files can be placed into a copy of the `Geo-X` repository in the `data` folder, as the baseline input data for modelling. 
 
-If you set `hydro` to True, a `[CountryName]_hydropower_dams.gpkg` file for each country will be generated into the `ccg-spider/prep/data` folder. These files must be placed into the `data/hydro` folder of your `Geo-X` repository.
+If you set `hydro` to True, a `[CountryName]_hydropower_dams.gpkg` file for each country will be generated into the `inputs_geox/final_data` folder. These files must be placed into the `data/hydro` folder of your `Geo-X` repository.
 
 ## Additional notes (Recommended to read at least once)
 As the runs progress, you may not see all the files being generated, but rest assured they are there, taking up space. Once the runs are finished, it's recommended to save the necessary files and review the listed folders to delete any unnecessary files in order to free up space:
 - `ccg-spider/prep`
 - `ccg-spider/prep/data`
-- `glaes/glases/data`
+- `glaes/glaes/data`
 - `inputs_geox/data`
 - `inputs_glaes/processed`
 
