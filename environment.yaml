@@ -1,0 +1,19 @@
+name: prep
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - conda-forge::geopandas
+  - conda-forge::rasterio
+  - conda-forge::shapely
+  - conda-forge::unidecode
+  - conda-forge::pyyaml
+  - conda-forge::pip
+  - conda-forge::matplotlib
+  - conda-forge::descartes
+  - conda-forge::pandas
+  - conda-forge::numpy<1.24
+  - conda-forge::scipy
+  - conda-forge::scikit-learn
+  - conda-forge::geokit=1.4.0
+  - conda-forge::gdal=3.4.*

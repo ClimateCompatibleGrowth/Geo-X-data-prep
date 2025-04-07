@@ -1,0 +1,4 @@
+id,lat,lon,name,type,capacity,avg_annual_generation_GWh,head,country_code
+1,11.49304,42.35251,DJ 1,HROR,369,897.8,61,DJ
+2,11.32,42.48,DJ 2,HROR,624,1500,14.2,DJ
+3,12.31304,43.1783,DJ 3,HROR,444,972,39.5,DJ

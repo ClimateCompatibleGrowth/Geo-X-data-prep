@@ -39,5 +39,5 @@ features:
   - name: hydro
     type: vector
     operation: sjoin
-    file: data/hydropower_dams.gpkg
+    file: data/Country_hydropower_dams.gpkg
     joined_col: capacity

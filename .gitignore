@@ -1,25 +1,21 @@
 # My exclusions
-Raw_Spatial_Data/**
-!Raw_Spatial_Data/.gitkeep
+__pycache__
+.DS_Store
 
-Inputs_Glaes/data/**
-!Inputs_Glaes/data/.gitkeep
+data/**
+!data/hydropower_plants.csv
+!data/.gitkeep
 
-Inputs_Glaes/processed/**
-!Inputs_Glaes/processed/.gitkeep
+inputs_glaes/.DS_Store
+inputs_glaes/processed/**
+!inputs_glaes/processed/.gitkeep
 
-Inputs_Spider/data/**
-!Inputs_Spider/data/.gitkeep
-
-Inputs_Spider/processed/**
-!Inputs_Spider/processed/.gitkeep
-
-Inputs_Spider/configs/**
-!Inputs_Spider/configs/.gitkeep
-
-Inputs_GeoH2/Data/**
-!Inputs_GeoH2/Data/.gitkeep
-!Inputs_GeoH2/.gitkeep
+inputs_geox/.DS_Store
+inputs_geox/data/**
+inputs_geox/final_data/**
+!inputs_geox/data/.gitkeep
+!inputs_geox/final_data/.gitkeep
+!inputs_geox/.gitkeep
 
 .idea/
 

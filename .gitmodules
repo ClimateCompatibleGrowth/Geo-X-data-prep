@@ -1,0 +1,6 @@
+[submodule "glaes"]
+	path = glaes
+	url = https://github.com/FZJ-IEK3-VSA/glaes.git
+[submodule "ccg-spider"]
+	path = ccg-spider
+	url = https://github.com/carderne/ccg-spider.git
