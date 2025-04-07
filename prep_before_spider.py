@@ -1,33 +1,32 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon Mar 10 2025
+@authors:
+ - Alycia Leonard, University of Oxford, alycia.leonard@eng.ox.ac.uk
+ - Samiyha Naqvi, University of Oxford, samiyha.naqvi@eng.ox.ac.uk
+ - Lukas Schirren, Imperial College London, lukas.schirren@imperial.ac.uk
 
-@author: Alycia Leonard, University of Oxford
+This script does three main preparation steps and one optional preparation 
+step.
 
-prep_before_spider.py
-
-This script does three main prep steps and one optional prep step.
-
+Optional step:
 If hydropower is required, then this script will prepare data for hexagon 
-preparation in SPIDER in the form of a geopackage file.
-The outputs are saved to /ccg-spider/prep/data.
+preparation in SPIDER in the form of a GeoPackage file.
+The outputs are saved to ccg-spider/prep/data/ and inputs_geox/final_data.
 
+Main steps:
 Firstly, it prepares data for land exclusion in GLAES, and hexagon preparation 
 in SPIDER.
-The raw inputs should be downloaded to /data before execution.
-The outputs are saved in /glaes/data and /ccg-spider/prep/data respectively.
+The raw inputs should be downloaded to data/ before execution.
+The outputs are saved in glaes/data/ and ccg-spider/prep/data/ respectively.
 
 Secondly, using GLAES, it implements land exclusions for the countries defined 
 in the list 'country_names', and allocates PV and wind installations over the 
 allowed area.
-The outputs are saved as .shp files in /input_glaes/processed.
+The outputs are saved as .shp files in input_glaes/processed/.
 
-Lastly, this script makes SPIDER configs for each country in the 'country_names'
-list.
-It saves these files as "[CountryName]_config.yml" under ccg-spider/prep.
-
+Lastly, this script makes SPIDER configs for each country in the 
+'country_names' list.
+It saves these files as "[CountryName]_config.yml" under ccg-spider/prep/.
 """
-
 import argparse
 import geopandas as gpd
 import os
@@ -46,20 +45,20 @@ from utils import clean_country_name
 def calculating_exclusions(glaes_data_path, country_name, EPSG, 
                            glaes_processed_path, turbine_radius):
     """
-    Calculating exclusions using glaes.
+    Calculating exclusions using GLAES.
 
     ...
     Parameters
     ----------
     glaes_data_path : string
-        Path to the folder where some files should be saved.
+        Path to the folder where some files will be saved.
     country_name : string
         Name of country for file names.
     EPSG : integer
         Unique identifier representing coordinate systems and other geodetic 
         properties.
     glaes_processed_path : string
-        Path to the folder where some files should be saved.
+        Path to the folder where some files will be saved.
     turbine_radius : integer
         Turbine radius in meters used for spacing.
     """
@@ -139,7 +138,7 @@ if __name__ == "__main__":
     data_path = os.path.join(dirname, 'data')
     regionPath = os.path.join(data_path, 'ne_50m_admin_0_countries', 'ne_50m_admin_0_countries.shp')
     clcRasterPath = os.path.join(data_path, "PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif")
-    oceanPath = os.path.join(data_path, "GOaS_v1_20211214_gpkg", "goas_v01.gpkg")
+    oceanPath = os.path.join(data_path, "goas_v01.gpkg")
     OSM_path = os.path.join(data_path, "OSM")
     config_name = "Country_config_hydro.yml" if args.hydro else "Country_config.yml"
     config_input_file_path = os.path.join(dirname, "inputs_spider", config_name)
@@ -169,7 +168,6 @@ if __name__ == "__main__":
     # Loop through a list of country names
     for country_name in country_names:
         country_name_clean = clean_country_name(country_name)
-
 
         # Optional prep step - creating hydropower geopackage file
         if args.hydro:
@@ -208,7 +206,6 @@ if __name__ == "__main__":
             gdf.set_crs(epsg=4326, inplace=True)
             gdf.to_file(output_path, layer='dams', driver="GPKG")
             gdf.to_file(final_data_output_path, layer='dams', driver="GPKG")
-
 
             print(f"GeoPackage file successfully created for {country_name_clean}\n")
 

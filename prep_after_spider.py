@@ -1,26 +1,27 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon Mar 10 2025
+@authors:
+ - Alycia Leonard, University of Oxford, alycia.leonard@eng.ox.ac.uk
+ - Samiyha Naqvi, University of Oxford, samiyha.naqvi@eng.ox.ac.uk
 
-@author: Alycia Leonard, University of Oxford
+This script does three main preparation steps:
 
-prep_after_spider.py
+Firstly, it joins the outputs from GLAES to the hexagons produced by SPIDER for 
+input to GEO-X.
+The inputs are the SPIDER hex.geojson file and the GLAES pv_placements.shp and 
+turbine_placements.shp files.
+The output is a hexagon file where a count of turbine and pv installations is 
+attached to the hexagons.
 
-This script does three main prep steps.
+Secondly, it assigns interest rate to different hexagons for different 
+technology categories based on their country, saving the hexagons into a new 
+file.
 
-Firstly, it joins the outputs from GLAES to the hexagons produced by SPIDER for input to GEO-X.
-The inputs are the SPIDER hex.geojson file and the GLAES pv_placements.shp and turbine_placements.shp files.
-The output is a hexagon file where a count of turbine and pv installations is attached to the hexagons.
+Lastly, this script removes the duplicated hexagons that belong to the 
+country/countries which are not the desired country and updates the file 
+created in step two.
 
-Secondly, it assigns interest rate to different hexagons for different technology categories
-based on their country, saving the hexagons into a new file.
-
-Lastly, this script removes the duplicated hexagons that belong to the country/countries
-which are not the desired country and updates the file created in step two.
-
-All files are saved to /inputs_geox/data.
+All files are saved to inputs_geox/data and inputs_geox/final_data.
 """
-
 import argparse
 import geopandas as gpd
 import json

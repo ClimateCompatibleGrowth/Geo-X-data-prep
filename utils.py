@@ -1,23 +1,18 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Mar 19 2025
-
 @authors: 
- - Alycia Leonard, University of Oxford
- - Samiyha Naqvi, University of Oxford
-
-utils.py
+ - Alycia Leonard, University of Oxford, alycia.leonard@eng.ox.ac.uk
+ - Samiyha Naqvi, University of Oxford, samiyha.naqvi@eng.ox.ac.uk
 
 A simple file used for shared functions.
 
 Contains clean_country_name().
 """
-
 from unidecode import unidecode
 
 def clean_country_name(country_name):
     """
-    Takes in country name and standardises to a "cleaner version"
+    Takes in a country name and standardises to a version without spaces, full-
+    stops and apostrophes.
 
     ...
     Parameters
