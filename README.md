@@ -86,9 +86,9 @@ You can also use files from **open-source datasets** like the [Hydropower Databa
 There are two main scripts that are used, as well as the SPIDER submodule.
 
 >[!IMPORTANT]
-> The size of the country can affect the runs as follows:
->   The two main scripts may take more than 10 minutes to complete.
->   SPIDER may crash. This is due to insufficient or failing computer memory (RAM) and can be solved by increasing your RAM or running on another computer with sufficient RAM.
+>The size of the country can affect the runs as follows:
+> - The two main scripts may take more than 10 minutes to complete.
+> - SPIDER may crash. This is due to insufficient or failing computer memory (RAM) and can be solved by increasing your RAM or running on another computer with sufficient RAM.
 
 ### 3.1 Run initial data prep before SPIDER
 Activate the `prep` environment for this step.
