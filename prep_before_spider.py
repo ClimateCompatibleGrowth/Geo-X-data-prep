@@ -138,7 +138,7 @@ if __name__ == "__main__":
     data_path = os.path.join(dirname, 'data')
     regionPath = os.path.join(data_path, 'ne_50m_admin_0_countries', 'ne_50m_admin_0_countries.shp')
     clcRasterPath = os.path.join(data_path, "PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif")
-    oceanPath = os.path.join(data_path, "goas_v01.gpkg")
+    oceanPath = os.path.join(data_path, "GOaS_v1_20211214_gpkg", "goas_v01.gpkg")
     OSM_path = os.path.join(data_path, "OSM")
     config_name = "Country_config_hydro.yml" if args.hydro else "Country_config.yml"
     config_input_file_path = os.path.join(dirname, "inputs_spider", config_name)
