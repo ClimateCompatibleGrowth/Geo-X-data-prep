@@ -58,13 +58,13 @@ Before running the preparation scripts, some data must be downloaded and placed 
 
 - The Global Oceans and Seas GeoPackage file can be downloaded from: https://www.marineregions.org/downloads.php
 - The country boundaries shapefile can be downloaded from: https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/
-- OpenStreetMap Shapefile layers can be downloaded from: https://download.geofabrik.de/
+- OpenStreetMap Shapefile layers can be downloaded from (.shp.zip): https://download.geofabrik.de/
 - The Corine Land Cover dataset (PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif) can be downloaded from: https://zenodo.org/records/3939050
 
 Extra information:
-- For the Global Oceans and Seas GeoPackage file, please rename the file to `goas_v01.gpkg`.
+- For the Global Oceans and Seas GeoPackage file, please place the downloaded `GOaS_v1_20211214_gpkg` folder into the `data` folder.
 - For the OpenStreetMap files, please extract the contents from the downloaded folder into a subfolder as follows `data/OSM/[COUNTRY NAME]` for each country.
-- For the files from Natural Earth Data, they should already be downloaded in a folder titled `ne_50m_admin_0_countries`. Please ensure that the folder is placed in the following location: `data/ne_50m_admin_0_countries`.
+- For the files from Natural Earth Data, please place the downloaded `ne_50m_admin_0_countries` folder into the `data` folder.
 
 >[!IMPORTANT]
 >Ensure that the config file you are using, either `Country_config.yml` or `Country_config_hydro.yml`, located in the `inputs_spider` folder, contains all the details you want SPIDER to use. Any removal or addition of features will require modification of the Geo-X codebase.
