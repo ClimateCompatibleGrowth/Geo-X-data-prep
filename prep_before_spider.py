@@ -10,22 +10,22 @@ step.
 Optional step:
 If hydropower is required, then this script will prepare data for hexagon 
 preparation in SPIDER in the form of a GeoPackage file.
-The outputs are saved to ccg-spider/prep/data/ and inputs_geox/final_data.
+The outputs are saved to ccg-spider/prep/data and inputs_geox/final_data.
 
 Main steps:
 Firstly, it prepares data for land exclusion in GLAES, and hexagon preparation 
 in SPIDER.
 The raw inputs should be downloaded to data/ before execution.
-The outputs are saved in glaes/data/ and ccg-spider/prep/data/ respectively.
+The outputs are saved in glaes/data and ccg-spider/prep/data respectively.
 
 Secondly, using GLAES, it implements land exclusions for the countries defined 
 in the list 'country_names', and allocates PV and wind installations over the 
 allowed area.
-The outputs are saved as .shp files in input_glaes/processed/.
+The outputs are saved as .shp files in input_glaes/processed.
 
 Lastly, this script makes SPIDER configs for each country in the 
 'country_names' list.
-It saves these files as "[CountryName]_config.yml" under ccg-spider/prep/.
+It saves these files as "[Country Name]_config.yml" under ccg-spider/prep.
 """
 import argparse
 import geopandas as gpd
@@ -73,6 +73,7 @@ def calculating_exclusions(glaes_data_path, country_name, EPSG,
 
     print(" - Applying exclusions - built-up area...")
     ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=50, prewarp=True)
+
     print(" - Applying exclusions - permanent water bodies...")
     ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=80, prewarp=True)
 
@@ -92,6 +93,69 @@ def calculating_exclusions(glaes_data_path, country_name, EPSG,
     print(" - Distributing pv plants and saving placements as .shp...")
     ec.distributeItems(separation=440, output=os.path.join(glaes_processed_path, f'{country_name}_pv_placements.shp'))
 
+def calculating_exclusions_slope_exclusion_included(glaes_data_path, 
+                                                    slope_exclusion_output_path,
+                                                    country_name, EPSG, 
+                                                    glaes_processed_path,
+                                                    turbine_radius):
+    """
+    Calculating exclusions using GLAES, including slope exclusions.
+
+    ...
+    Parameters
+    ----------
+    glaes_data_path : string
+        Path to the folder containing some input files.
+    slope_exclusion_output_path : string
+        Path to the folder containing some input files.
+    country_name : string
+        Name of country for file names.
+    EPSG : integer
+        Unique identifier representing coordinate systems and other geodetic 
+        properties.
+    glaes_processed_path : string
+        Path to the folder where some files will be saved.
+    turbine_radius : integer
+        Turbine radius in meters used for spacing.
+    """
+    for gen in ("Solar", "Wind"):
+        print(f" - Initializing exclusion calculator for {gen}...")
+        ec = gl.ExclusionCalculator(os.path.join(glaes_data_path,  f'{country_name}.geojson'), srs=EPSG, pixelSize=100)
+
+        print(" - Applying exclusions - coast...")
+        ec.excludeVectorType(os.path.join(glaes_data_path,  f'{country_name}_oceans.geojson'), buffer=250)
+
+        print(" - Applying exclusions - herbaceous wetland...")
+        ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=90, prewarp=True)
+
+        print(" - Applying exclusions - built-up area...")
+        ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=50, prewarp=True)
+        
+        print(" - Applying exclusions - permanent water bodies...")
+        ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=80, prewarp=True)
+        if gen == "Wind":
+            print(" - Applying exclusions - slope")
+            ec.excludeRasterType(os.path.join(slope_exclusion_output_path, f'{country_name}_slope_excluded_wind.tif'), value=1, prewarp=True)
+            
+            print(" - Saving excluded areas for wind as .tif file...")
+            ec.save(os.path.join(glaes_processed_path,  f'{country_name}_wind_exclusions.tif'), overwrite=True)
+        
+            print(" - Distributing turbines and saving placements as .shp...")
+            ec.distributeItems(separation=(turbine_radius * 10, turbine_radius * 5), axialDirection=45,
+                            output=os.path.join(glaes_processed_path, f'{country_name}_turbine_placements.shp'))
+        if gen == "Solar":
+            print(" - Applying exclusions - slope")
+            ec.excludeRasterType(os.path.join(slope_exclusion_output_path, f'{country_name}_slope_excluded_pv.tif'), value=1, prewarp=True)
+            
+            print(" - Applying exclusions - agriculture...")
+            ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=40, prewarp=True)
+            
+            print(" - Saving excluded areas for PV as .tif file...")
+            ec.save(os.path.join(glaes_processed_path, f'{country_name}_pv_exclusions.tif'), overwrite=True)
+            
+            print(" - Distributing pv plants and saving placements as .shp...")
+            ec.distributeItems(separation=440, output=os.path.join(glaes_processed_path, f'{country_name}_pv_placements.shp'))
+
 def replace_country(node, country_name):
     """
     Recursively replaces "Country" with the country name provided.
@@ -109,7 +173,6 @@ def replace_country(node, country_name):
     -------
     node : dictionary
         File contents with the correct country name used.
-
     """
     if isinstance(node, dict):
         return {key: replace_country(value, country_name) for key, value in node.items()}
@@ -128,30 +191,35 @@ if __name__ == "__main__":
                          help="<Required> Enter the country names you are preparing for.")
     parser.add_argument('--hydro', nargs='?', default=False, type=bool,
                         help="<Optional> Enter True if you need hydro to be prepared for. Default is False")
+    parser.add_argument('-se', '--slopeexclusion', nargs='?', default=False, type=bool,
+                        help="<Optional> Enter True if you have used Slope-Exclusion submodule. Default is False")
     args = parser.parse_args()
 
     # Define country name(s) to be used
     country_names = args.countries
 
-    # Store paths to input files and folders
+    # Store paths to files and folders
     dirname = os.path.dirname(__file__)
+
     data_path = os.path.join(dirname, 'data')
-    regionPath = os.path.join(data_path, 'ne_50m_admin_0_countries', 'ne_50m_admin_0_countries.shp')
-    clcRasterPath = os.path.join(data_path, "PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif")
-    oceanPath = os.path.join(data_path, "GOaS_v1_20211214_gpkg", "goas_v01.gpkg")
+    region_path = os.path.join(data_path, 'ne_50m_admin_0_countries', 'ne_50m_admin_0_countries.shp')
+    clc_raster_path = os.path.join(data_path, "PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif")
+    ocean_path = os.path.join(data_path, "GOaS_v1_20211214_gpkg", "goas_v01.gpkg")
     OSM_path = os.path.join(data_path, "OSM")
+
     config_name = "Country_config_hydro.yml" if args.hydro else "Country_config.yml"
     config_input_file_path = os.path.join(dirname, "inputs_spider", config_name)
-    
-    # Store paths to output folders
+
+    slope_exclusion_output_path = os.path.join(dirname, "Slope-Exclusion", "output")
     glaes_data_path = os.path.join(dirname, 'glaes', 'glaes', 'data')
     spider_prep_data_path = os.path.join(dirname, 'ccg-spider', 'prep', 'data')
+
     glaes_processed_path = os.path.join(dirname, 'inputs_glaes', 'processed')
     spider_prep_path = os.path.join(dirname, "ccg-spider", "prep")
     geox_final_data_path = os.path.join(dirname, "inputs_geox/final_data")
 
     # Read shapefile of countries
-    countries = gpd.read_file(regionPath).set_index('NAME')
+    countries = gpd.read_file(region_path).set_index('NAME')
 
     # Open and load the input config YAML file to be used to make the 
     # country-specific config YAML file
@@ -192,12 +260,12 @@ if __name__ == "__main__":
             # Drop rows with missing coordinates
             data = data.dropna(subset=['lon', 'lat'])
 
-            ######## Data Preparation ########
+            # Data Preparation
             # Filter for existing plants
             data_existing = data.dropna(subset=['head'])
             print(f"Number of missing 'head' values: {data_existing['head'].isna().sum()}")
 
-            ######## Export GeoPackage ########
+            # Export GeoPackage
             gdf = gpd.GeoDataFrame(
                 data_existing,
                 geometry=gpd.points_from_xy(data_existing.lon, data_existing.lat)
@@ -234,7 +302,7 @@ if __name__ == "__main__":
         country_buffer.to_file(os.path.join(glaes_data_path, f'{country_name_clean}_buff.geojson'), driver='GeoJSON', encoding='utf-8')
 
         # Reproject GOAS to UTM zone of country
-        GOAS = gpd.read_file(oceanPath)
+        GOAS = gpd.read_file(ocean_path)
         country_buffer = country_buffer.to_crs(epsg=4326)
         GOAS.to_crs(epsg=4326, inplace=True)
         GOAS_country = gpd.clip(GOAS, country_buffer)
@@ -261,7 +329,7 @@ if __name__ == "__main__":
         country.to_file(os.path.join(spider_prep_data_path, f'{country_name_clean}.gpkg'), driver='GPKG', encoding='utf-8')
 
         # Open the CLC GeoTIFF file for reading
-        with rasterio.open(clcRasterPath) as src:
+        with rasterio.open(clc_raster_path) as src:
             # Mask the raster using the vector file's geometry
             out_image, out_transform = mask(src, country.geometry.apply(mapping), crop=True)
             # Copy the metadata from the source raster
@@ -287,7 +355,16 @@ if __name__ == "__main__":
         with open(os.path.join(glaes_data_path, f'{country_name_clean}_EPSG.pkl'), 'rb') as file:
             EPSG = pickle.load(file)
 
-        calculating_exclusions(glaes_data_path, country_name_clean, EPSG, glaes_processed_path, turbine_radius)
+        # Chooses slope-exclusion function based on user input
+        if args.slopeexclusion:
+            calculating_exclusions_slope_exclusion_included(glaes_data_path, 
+                                                    slope_exclusion_output_path,
+                                                    country_name, EPSG, 
+                                                    glaes_processed_path,
+                                                    turbine_radius)
+        else:
+            calculating_exclusions(glaes_data_path, country_name_clean, EPSG, 
+                                   glaes_processed_path, turbine_radius)
         print("Finished calulcating land exclusions\n")
      
 
