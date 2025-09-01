@@ -82,9 +82,8 @@ Input Data Requirements:
 - The script is designed for datasets containing:
   - Latitude & Longitude (plant location)
   - Installed capacity (MW)
-  - Annual generation (GWh)
-  - Plant type (e.g., HDAM, HPHS,...)
   - Hydraulic head (m)
+  - Name (for user to keep track)
 
 #### 2.2.2 Slope-exclusion input data
 Slope-exclusion requires two input data files that must be downloaded and renamed:
@@ -145,14 +144,16 @@ Take the following command, replace `[COUNTRY NAME]` and keep/remove `--hydro` a
 
 The above will first prepare a hydropower GeoPackage file, then pre-process the raw data, create a config file for SPIDER to use, and finally run GLAES. This will be done for each country provided.
 
->[!NOTE]
->When running multiple countries, you must only run countries in groups that all need hydropower considered or do not, so that the config file is correct for each country.
+Remember to deactive the `prep` environment before beginning the next step.
 
 ### 3.2 Run SPIDER
->[!NOTE]
-> Remember to deactivate the `prep` environment.
+>[!IMPORTANT]
+>Before running this step, it's important to know the following:
+> - You must check that the config file is correct for each country you intend to run results for. These can be found in the `ccg-spider/prep` folder.
+> - The version of ccg-spider that is used is `Commit 2eed525`. We recommend using this version for Geo-X-data-prep, but you can change it to best fit your needs.
+> - Do not use multiple `&&` symbols to run more than one country at once. Only one set of `blank.tif` and `blank_proj.tif` files will be generated based on the first country, which will lead to inaccurate hexagon files for subsequent countries.
 
-Now you will need to move to the `ccg-spider/prep` directory, activate the `spider` environment, and use the SPIDER CLI.
+Now, you will need to move to the `ccg-spider/prep` directory, activate the `spider` environment, and use the SPIDER CLI.
 
 Take the following command, replace `[COUNTRY NAME]` with the name of the country you are studying without spaces or periods, and paste it into your terminal:
 
@@ -160,9 +161,6 @@ Take the following command, replace `[COUNTRY NAME]` with the name of the countr
 
 This command must be used for **each** country separately.
 This will produce a set of hexagon tiles for each country using the parameters in the `Country_config.yml` file.
-
->[!IMPORTANT]
-> Do not use multiple `&&` symbols to run more than one country at once. Only one set of `blank.tif` and `blank_proj.tif` files will be generated based on the first country, which will lead to inaccurate hexagon files for subsequent countries.
 
 ### 3.3 Run data prep after SPIDER
 >[!NOTE]
