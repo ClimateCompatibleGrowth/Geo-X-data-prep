@@ -12,12 +12,11 @@ turbine_placements.shp files.
 The output is a hexagon file where a count of turbine and pv installations is 
 attached to the hexagons.
 
-Secondly, it assigns interest rate to different hexagons for different 
-technology categories based on their country, saving the hexagons into a new 
-file.
+Secondly, it assigns the specified country name to each hexagon and updates the 
+CRS to match the world dataset, saving the hexagons into a new file.
 
 Lastly, this script removes the duplicated hexagons that belong to the 
-country/countries which are not the desired country and updates the file 
+country/countries which are not the specified country and updates the file 
 created in step two.
 
 All files are saved to inputs_geox/data and inputs_geox/final_data.
@@ -78,8 +77,8 @@ def combine_glaes_spider(hex, wind_points, pv_points):
 
 def assign_country(hexagons, world):
     """
-    Assigns interest rate to different hexagons for different technology 
-    categories based on their country.
+    Assigns specific country name to each hexagon and matches CRS to the world
+    dataset.
 
     ...
     Parameters
@@ -209,8 +208,8 @@ if __name__ == "__main__":
         update_hexagons(hexagons, save_path)
         print("Done! File saved \n")
                  
-        # Step 2 - assigning interest rate to the hexagons
-        print("Assigning interest rate to hexagons...")
+        # Step 2 - assigning country name to the hexagons
+        print("Assigning country name to hexagons...")
         # May need to switch to higher res
         world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
         

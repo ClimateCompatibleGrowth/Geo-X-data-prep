@@ -4,3 +4,6 @@
 [submodule "ccg-spider"]
 	path = ccg-spider
 	url = https://github.com/carderne/ccg-spider.git
+[submodule "Slope-Exclusion"]
+	path = Slope-Exclusion
+	url = https://github.com/ClimateCompatibleGrowth/Slope-Exclusion.git
