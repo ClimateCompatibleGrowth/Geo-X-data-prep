@@ -23,8 +23,8 @@ in the list 'country_names', and allocates PV and wind installations over the
 allowed area.
 The outputs are saved as .shp files in input_glaes/processed.
 
-Lastly, this script makes SPIDER configs for each country in the 
-'country_names' list.
+Lastly, this script tailors config files for each country in the 
+'country_names' list for SPIDER to use.
 It saves these files as "[Country Name]_config.yml" under ccg-spider/prep.
 """
 import argparse
@@ -90,7 +90,7 @@ def calculating_exclusions(glaes_data_path, country_name, EPSG,
     print(" - Saving excluded areas for PV as .tif file...")
     ec.save(os.path.join(glaes_processed_path, f'{country_name}_pv_exclusions.tif'), overwrite=True)
 
-    print(" - Distributing pv plants and saving placements as .shp...")
+    print(" - Distributing pv modules and saving placements as .shp...")
     ec.distributeItems(separation=440, output=os.path.join(glaes_processed_path, f'{country_name}_pv_placements.shp'))
 
 def calculating_exclusions_slope_exclusion_included(glaes_data_path, 
@@ -118,7 +118,7 @@ def calculating_exclusions_slope_exclusion_included(glaes_data_path,
     turbine_radius : integer
         Turbine radius in meters used for spacing.
     """
-    for gen in ("Solar", "Wind"):
+    for gen in ("solar", "wind"):
         print(f" - Initializing exclusion calculator for {gen}...")
         ec = gl.ExclusionCalculator(os.path.join(glaes_data_path,  f'{country_name}.geojson'), srs=EPSG, pixelSize=100)
 
@@ -133,7 +133,7 @@ def calculating_exclusions_slope_exclusion_included(glaes_data_path,
         
         print(" - Applying exclusions - permanent water bodies...")
         ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=80, prewarp=True)
-        if gen == "Wind":
+        if gen == "wind":
             print(" - Applying exclusions - slope")
             ec.excludeRasterType(os.path.join(slope_exclusion_output_path, f'{country_name}_slope_excluded_wind.tif'), value=1, prewarp=True)
             
@@ -143,7 +143,7 @@ def calculating_exclusions_slope_exclusion_included(glaes_data_path,
             print(" - Distributing turbines and saving placements as .shp...")
             ec.distributeItems(separation=(turbine_radius * 10, turbine_radius * 5), axialDirection=45,
                             output=os.path.join(glaes_processed_path, f'{country_name}_turbine_placements.shp'))
-        if gen == "Solar":
+        if gen == "solar":
             print(" - Applying exclusions - slope")
             ec.excludeRasterType(os.path.join(slope_exclusion_output_path, f'{country_name}_slope_excluded_pv.tif'), value=1, prewarp=True)
             
@@ -153,7 +153,7 @@ def calculating_exclusions_slope_exclusion_included(glaes_data_path,
             print(" - Saving excluded areas for PV as .tif file...")
             ec.save(os.path.join(glaes_processed_path, f'{country_name}_pv_exclusions.tif'), overwrite=True)
             
-            print(" - Distributing pv plants and saving placements as .shp...")
+            print(" - Distributing pv modules and saving placements as .shp...")
             ec.distributeItems(separation=440, output=os.path.join(glaes_processed_path, f'{country_name}_pv_placements.shp'))
 
 def replace_country(node, country_name):
@@ -189,10 +189,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('countries', nargs='+', type=str,
                          help="<Required> Enter the country names you are preparing for.")
-    parser.add_argument('--hydro', nargs='?', default=False, type=bool,
-                        help="<Optional> Enter True if you need hydro to be prepared for. Default is False")
-    parser.add_argument('-se', '--slopeexclusion', nargs='?', default=False, type=bool,
-                        help="<Optional> Enter True if you have used Slope-Exclusion submodule. Default is False")
+    parser.add_argument('--hydro', action='store_true',
+                        help="<Optional> Use the flag if you need hydropower to be considered. Default will not consider hydropower.")
+    parser.add_argument('-se', '--slopeexclusion', action='store_true',
+                        help="<Optional> Use the flag if you have used the Slope-Exclusion submodule. Default will not consider that the Slope-Exclusion submodule has been used.")
     args = parser.parse_args()
 
     # Define country name(s) to be used

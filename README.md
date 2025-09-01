@@ -1,52 +1,55 @@
 # Geo-X-data-prep
 Spatial data preparation tools for [Geo-X](https://github.com/ClimateCompatibleGrowth/Geo-X) users. 
 The Geo-X library requires spatial hexagon files for the area of interest with several spatial parameters attached as an input. 
-These scripts are designed to assist in creating these input data. They allow users to move from raw data inputs to a Geo-X-ready hexagon input by interfacing with the Global Land Availability of Energy Systems ([GLAES](https://github.com/FZJ-IEK3-VSA/glaes/tree/master/)) and Spatially Integrated Development of Energy and Resources ([SPIDER](https://github.com/carderne/ccg-spider/tree/main)).
+These scripts are designed to assist in creating these input data. They allow users to move from raw data inputs to a Geo-X-ready input file containing hexagons, by interfacing with the [Slope-Exclusion](https://github.com/ClimateCompatibleGrowth/Slope-Exclusion/tree/main), Global Land Availability of Energy Systems ([GLAES](https://github.com/FZJ-IEK3-VSA/glaes/tree/master/)), and Spatially Integrated Development of Energy and Resources ([SPIDER](https://github.com/carderne/ccg-spider/tree/main)) repositories.
 ___
 ## 1 Installation instructions
 
 ### 1.1 Clone the repository and submodules
 First, clone the repository and initialise the submodules in one step:
-```
-/your/path % git clone --recurse-submodules https://github.com/ClimateCompatibleGrowth/Geo-X-data-prep.git
-```
+
+`.../your/path % git clone --recurse-submodules https://github.com/ClimateCompatibleGrowth/Geo-X-data-prep.git`
+
 After cloning, navigate to the top-level folder of the repository.
 
 ### 1.2 Install Python dependencies
 The Python package requirements to use these tools are in the `environment.yaml` file. 
 You can install these requirements in a new environment using `mamba` package and environment manager (installation instructions [here](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)): 
-```
-.../Geo-X-data-prep % mamba env create -f environment.yaml
-```
+
+`.../Geo-X-data-prep % mamba env create -f environment.yaml`
+
 This new environment can be activated using:
-```
-.../Geo-X-data-prep % mamba activate prep
-```
-Make sure to deactivate the environment before proceeding to the next step.
+
+`.../Geo-X-data-prep % mamba activate prep`
+
+Before proceeding to the next step, make sure the environment is deactivated 
+using:
+
+`.../Geo-X-data-prep % mamba deactivate`
 
 ### 1.3 Install SPIDER environment
 You will need to create a separate environment for the SPIDER submodule to work.
 
 Firstly, navigate to the `ccg-spider/prep` folder:
-```
-.../Geo-X-data-prep % cd ccg-spider/prep
-```
+
+`.../Geo-X-data-prep % cd ccg-spider/prep`
+
 Next, create a new environment using your package and environment manager. Below shows how to, using `mamba`:
-```
-.../prep % mamba create -n spider
-```
+
+`.../prep % mamba create -n spider`
+
 Next, activate the environment using:
-```
-.../prep % mamba activate spider
-```
+
+`.../prep % mamba activate spider`
+
 Next, install some necessary packages:
-```
-.../prep % mamba install pip gdal
-```
+
+`.../prep % mamba install pip gdal`
+
 Next, install the SPIDER requirements:
-```
-.../prep % pip install -e .
-```
+
+`.../prep % pip install -e .`
+
 You should now have a fully functioning environment named `spider`. You can deactivate this for now and return to the top-level of the repository.
 ___
 ## 2 Preparing input data
@@ -71,9 +74,9 @@ Extra information:
 
 ### 2.2 Optional input data
 #### 2.2.1 Hydropower input data
-If you want hydropower to be used as a generator, you will need another input file. In the `data` folder, there is a template that can be filled in and name updated. It should be named `[COUNTRY NAME]_hydropower_plants.csv` and kept in the `data` folder.
+If you want hydropower to be used as a generator, you will need another input file. In the `data` folder, there is a template that can be filled in and name updated. It should be named `[COUNTRY NAME]_hydropower_plants.csv` and kept in that folder.
 
-You can also use files from open-source datasets like the [Hydropower Database](https://github.com/energy-modelling-toolkit/hydro-power-database). You must rename the file to `[COUNTRY NAME]_hydropower_plants.csv` and ensure that the column titles match those in the template file. Extra columns do not need to be deleted, but they will not be taken into consideration when creating the GeoPackage file.
+You can also use files from open-source datasets, like the [Hydropower Database](https://github.com/energy-modelling-toolkit/hydro-power-database). You must place that file into the `data` folder, rename the file to `[COUNTRY NAME]_hydropower_plants.csv` and ensure that the required column titles match those provided in the template file. Extra columns do not need to be deleted, but they will not be taken into consideration when creating the GeoPackage file.
 
 Input Data Requirements:
 - The script is designed for datasets containing:
@@ -92,12 +95,11 @@ Slope-exclusion requires two input data files that must be downloaded and rename
 >The above naming conventions will allow you to place several files to run for several countries. At this point, each country will have to be run separately for some steps, this is expanded on in step 3.
 
 ## 3 Running data prep
-There are two main scripts that are used, as well as the SPIDER submodule. As an optional step, the Slope-Exclusion submodule can be used before running any of the main steps to gather some input data for GLAES, which is part of the first main script.
+There are two main scripts that are used, as well as the SPIDER submodule. As an optional step, the Slope-Exclusion submodule can be used before running any of the main steps to gather some input data for GLAES, which is part of the first main script. This data will be used to exlude land for solar and wind generators, based on slope.
 
 >[!IMPORTANT]
 >The size of the country can affect the runs as follows:
 > - The two main scripts may take more than 10 minutes to complete.
-> - SPIDER may crash. This is due to insufficient or failing computer memory (RAM) and can be solved by increasing your RAM or running on another computer with sufficient RAM.
 
 ### Optional step - Slope-Exclusion
 >[!NOTE]
@@ -105,48 +107,46 @@ There are two main scripts that are used, as well as the SPIDER submodule. As an
 
 Move to the `Slope-Exclusion` directory and activate the `prep` environment.
 
-Take the following command, replace `[COUNTRY NAME]` and `[CONTINENT]` as necessary, and paste it into your terminal:
-```
-.../Slope-Exclusion % python clip_raster_to_boundary.py --raster data/[CONTINENT]_full_dem.tif --boundary data/[COUNTRY NAME]_boundary.geojson --output data/dem.tif
-```
+Copy  the following command, replace `[COUNTRY NAME]` and `[CONTINENT]` as necessary, and paste it into your terminal:
 
-For the second and third command, there are some arguments that you need to pass via the terminal. They are:
+`.../Slope-Exclusion % python clip_raster_to_boundary.py --raster data/[CONTINENT]_full_dem.tif --boundary data/[COUNTRY NAME]_boundary.geojson --output data/dem.tif`
+
+For the second and third commands, there are some arguments that can be passed via the terminal. They are:
 - `--type`: (Only one required, `string` type) Should be either `solar`, `wind`, or `both`.
 - `--solar-nea`: (Default is `6.28`, `float` type) The slope threshold for solar PV installations on north, east, and west-facing slopes.
 - `--solar-s`: (Default is `33`, `float` type) The slope threshold for solar PV installations on south-facing slopes.
 - `--wind-thresh`: (Default is `8.53`, `float` type) The slope threshold for wind turbine exclusion.
 - `--sigma`: (Default is `1`, `float` type) The standard deviation of the Gaussian filter used to smooth the DEM.
 - `--output`: (Default is `exclusion.tif`, `string` type) Name of output file.
-Below are the recommended commands to get the files required for GLAES. You can change the float arguments to match the assumptions you wish to use.
 
-Take the following command, replace `[COUNTRY NAME]` as necessary, and paste it into your terminal:
-```
-.../Slope-Exclusion % python exclude_slope.py --type solar --output [COUNTRY NAME]_slope_excluded_pv.tif
-```
+Below are the recommended commands to get the files required for GLAES. You can change any float arguments to match assumptions that you wish to use.
 
-Take the following command, replace `[COUNTRY NAME]` as necessary, and paste it into your terminal:
-```
-.../Slope-Exclusion % python exclude_slope.py --type wind --output [COUNTRY NAME]_slope_excluded_wind.tif
-```
+Copy the following command, replace `[COUNTRY NAME]` as necessary, and paste it into your terminal:
 
-The output files can be found in `Slope-Exclusion/output` and must be moved to `glaes/glaes/data`.
+`.../Slope-Exclusion % python exclude_slope.py --type solar --output [COUNTRY NAME]_slope_excluded_pv.tif`
+
+Copy the following command, replace `[COUNTRY NAME]` as necessary, and paste it into your terminal:
+
+`.../Slope-Exclusion % python exclude_slope.py --type wind --output [COUNTRY NAME]_slope_excluded_wind.tif`
+
+The output files can be found in `Slope-Exclusion/output` and will by GLAES as input data.
 
 ### 3.1 Run initial data prep before SPIDER
->[!NOTE]
->If you want to run multiple countries together, they must use the same config file. Otherwise, you can run each country separately, modifying the config file as necessary.
-
-Activate the `prep` environment for this step, if not already activated from previous step.
+Make sure you are in the top-level folder, with the `prep` environment activated.
 
 There are some arguments that you need to pass via the terminal. They are:
 - `countries`: (At least one required, `string` type) This should be the names of the countries you are preparing with a space between them. Make sure that the spellings used for country names match those used in the Natural Earth country boundaries shapefile.
-- `--hydro`: (Default is `False`, `boolean` type) Only use this when you need to change to `True`.
-- `-se`: (Default is `False`, `boolean` type) Only use this when you have used the Slope-Exclusion submodule and need to change to `True`.
+- `--hydro`: (Default is `False`, `boolean` type) Only use this flag when you want hydropower to be considered, otherwise it will not be considered.
+- `-se`: (Default is `False`, `boolean` type) Only use this flag when you have used the Slope-Exclusion submodule, otherwise it will not consider that the Slope-Exclusion submodule has been used.
 
 Take the following command, replace `[COUNTRY NAME]` and keep/remove `--hydro` and `-se` as needed, and paste it into your terminal:
-```
-.../Geo-X-data-prep % python prep_before_spider.py [COUNTRY NAME] [COUNTRY NAME] --hydro True -se True
-```
-The above will first prepare a hydropower GeoPackage file, then pre-process the raw data, create a SPIDER config, and finally run GLAES. This will be done for each country provided.
+
+`.../Geo-X-data-prep % python prep_before_spider.py [COUNTRY NAME] [COUNTRY NAME] --hydro -se`
+
+The above will first prepare a hydropower GeoPackage file, then pre-process the raw data, create a config file for SPIDER to use, and finally run GLAES. This will be done for each country provided.
+
+>[!NOTE]
+>When running multiple countries, you must only run countries in groups that all need hydropower considered or do not, so that the config file is correct for each country.
 
 ### 3.2 Run SPIDER
 >[!NOTE]
@@ -155,10 +155,10 @@ The above will first prepare a hydropower GeoPackage file, then pre-process the 
 Now you will need to move to the `ccg-spider/prep` directory, activate the `spider` environment, and use the SPIDER CLI.
 
 Take the following command, replace `[COUNTRY NAME]` with the name of the country you are studying without spaces or periods, and paste it into your terminal:
-```
-.../prep % gdal_rasterize data/[COUNTRY NAME].gpkg -burn 1 -tr 0.1 0.1 data/blank.tif && gdalwarp -t_srs EPSG:4088 data/blank.tif data/blank_proj.tif && spi --config=[COUNTRY NAME]_config.yml [COUNTRY NAME]_hex.geojson
-```
-This command must be run for **each** country.
+
+`.../prep % gdal_rasterize data/[COUNTRY NAME].gpkg -burn 1 -tr 0.1 0.1 data/blank.tif && gdalwarp -t_srs EPSG:4088 data/blank.tif data/blank_proj.tif && spi --config=[COUNTRY NAME]_config.yml [COUNTRY NAME]_hex.geojson`
+
+This command must be used for **each** country separately.
 This will produce a set of hexagon tiles for each country using the parameters in the `Country_config.yml` file.
 
 >[!IMPORTANT]
@@ -172,20 +172,20 @@ Activate the `prep` environment for this step.
 
 There are some arguments that you need to pass via the terminal. They are:
 - `countries`: (At least one required, `string` type) This should be the name of the countries you are preparing with a space between them. Make sure that the spellings used for country names match those used in the Natural Earth country boundaries shapefile.
-- `-ic`: (At least one required, `string` type) This is the two-letter ISO code for your countries. They must be in the same order as your countries.
+- `-ic`: (At least one required, `string` type) This is the two-letter ISO code for your countries. They **must** be in the same order as your countries.
 
 Take the following command, replace `[COUNTRY NAME]` and `[ISO CODE]` as necessary, and paste it into your terminal:
-```
-.../Geo-X-data-prep % python prep_after_spider.py [COUNTRY NAME] [COUNTRY NAME] -ic [ISO CODE] [ISO CODE]
-```
-The above will combine the SPIDER and GLAES files. It will then assign an interest rate to different hexagons for different technology categories based on their country. Lastly, this script removes the duplicated hexagons that belong to a country which are not the desired country. 
 
-The final file will be saved as `hex_final_[COUNTRY ISO CODE].geojson` for each country in the `inputs_geox/final_data` folder. These `hex_final_[COUNTRY ISO CODE].geojson` files can be placed into a copy of the `Geo-X` repository in the `data` folder, as the baseline input data for modelling. 
+`.../Geo-X-data-prep % python prep_after_spider.py [COUNTRY NAME] [COUNTRY NAME] -ic [ISO CODE] [ISO CODE]`
+
+The above will combine the SPIDER and GLAES files. It will then assign the specified country name to the hexagons, as well as updating the CRS to match the world dataset. Lastly, this script removes the duplicated hexagons that belong to a country which is not the specified country. 
+
+The final file will be saved as `hex_final_[COUNTRY ISO CODE].geojson` for each country in the `inputs_geox/final_data` folder. These `hex_final_[COUNTRY ISO CODE].geojson` files can be placed into a copy of the `Geo-X` repository in the `data` folder, as the baseline input data for modelling.
 
 If you set `hydro` to True, a `[COUNTRY NAME]_hydropower_dams.gpkg` file for each country will be generated into the `inputs_geox/final_data` folder. These files must be placed into the `data/hydro` folder of your `Geo-X` repository.
 
 ## Additional notes (Recommended to read at least once)
-As the runs progress, you may not see all the files being generated, but rest assured they are there, taking up space. Once the runs have been completed, it's recommended to save the necessary files and review the listed folders below to delete any unnecessary files in order to free up space:
+As the runs progress, you may not see all the files being generated, but rest assured they are there and taking up space. Once the runs have been completed, it's recommended to save the necessary files and review the listed folders below to delete any unnecessary files in order to free up space:
 - `ccg-spider/prep`
 - `ccg-spider/prep/data`
 - `glaes/glaes/data`
