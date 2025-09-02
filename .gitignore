@@ -4,6 +4,7 @@ __pycache__
 
 data/**
 !data/hydropower_plants.csv
+!data/geothermal_plants.csv
 !data/.gitkeep
 
 inputs_glaes/.DS_Store
