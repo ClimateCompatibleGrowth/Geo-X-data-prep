@@ -248,8 +248,8 @@ if __name__ == "__main__":
             data = pd.read_csv(input_path)
 
             # Select relevant columns
-            data = data[['lat', 'lon', 'name', 
-                        'capacity', 'head', 'country_code']]
+            data = data[['name','lat', 'lon', 
+                        'capacity', 'head']]
 
             # Ensure numeric conversion for relevant columns
             data['lon'] = pd.to_numeric(data['lon'], errors='coerce')
