@@ -8,8 +8,10 @@ This script does three main preparation steps and one optional preparation
 step.
 
 Optional step:
-If hydropower is required, then this script will prepare data for hexagon 
-preparation in SPIDER in the form of a GeoPackage file.
+If hydropower is required, then this script will prepare hydropower data for 
+hexagon preparation in SPIDER in the form of a GeoPackage file.
+Likewise, if geothermal is required, then this script will prepare geothermal
+data for hexagon preparation in SPIDER in the form of a GeoPackage file.
 The outputs are saved to ccg-spider/prep/data and inputs_geox/final_data.
 
 Main steps:
@@ -191,7 +193,7 @@ if __name__ == "__main__":
                          help="<Required> Enter the country names you are preparing for.")
     parser.add_argument('--hydro', action='store_true',
                         help="<Optional> Use the flag if you need hydropower to be considered. Default will not consider hydropower.")
-    parser.add_argument('--geo', action='store_true',
+    parser.add_argument('--geothermal', action='store_true',
                         help="<Optional> Use the flag if you need geothermal to be considered. Default will not consider geothermal.")
     parser.add_argument('-se', '--slopeexclusion', action='store_true',
                         help="<Optional> Use the flag if you have used the Slope-Exclusion submodule. Default will not consider that the Slope-Exclusion submodule has been used.")
@@ -279,11 +281,12 @@ if __name__ == "__main__":
             print(f"GeoPackage file successfully created for {country_name_clean}\n")
 
         # Optional prep step - creating geothermal geopackage file
-        if args.geo:
+        if args.geothermal:
             print(f"Creating geothermal geopackage file for {country_name_clean}...")
             input_path = os.path.join(data_path, f"{country_name_clean}_geothermal_plants.csv") 
             output_path = os.path.join(spider_prep_data_path, f"{country_name_clean}_geothermal_plants.gpkg")
-
+            final_data_output_path  = os.path.join(geox_final_data_path, f"{country_name_clean}_geothermal_plants.gpkg")
+            
             # Read data from CSV
             data = pd.read_csv(input_path)
 
@@ -306,8 +309,8 @@ if __name__ == "__main__":
             )
 
             gdf.set_crs(epsg=4326, inplace=True)
-            gdf.to_file(output_path, layer='dams', driver="GPKG")
-            gdf.to_file(final_data_output_path, layer='dams', driver="GPKG")
+            gdf.to_file(output_path, layer='plants', driver="GPKG")
+            gdf.to_file(final_data_output_path, layer='plants', driver="GPKG")
 
             print(f"GeoPackage file successfully created for {country_name_clean}\n")
 
@@ -420,7 +423,7 @@ if __name__ == "__main__":
             current_data["features"].append(data)
         
         # Adding geothermal data if required
-        if args.geo:
+        if args.geothermal:
             data = {
                 "name": "geothermal",
                 "type": "vector",
@@ -436,6 +439,3 @@ if __name__ == "__main__":
             yaml.dump(current_data, file, default_flow_style=False, allow_unicode=True)
 
         print(f'Config file is created and saved as "{output_file}"')
-
-
-
