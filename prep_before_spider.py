@@ -8,8 +8,10 @@ This script does three main preparation steps and one optional preparation
 step.
 
 Optional step:
-If hydropower is required, then this script will prepare data for hexagon 
-preparation in SPIDER in the form of a GeoPackage file.
+If hydropower is required, then this script will prepare hydropower data for 
+hexagon preparation in SPIDER in the form of a GeoPackage file.
+Likewise, if geothermal is required, then this script will prepare geothermal
+data for hexagon preparation in SPIDER in the form of a GeoPackage file.
 The outputs are saved to ccg-spider/prep/data and inputs_geox/final_data.
 
 Main steps:
@@ -191,6 +193,8 @@ if __name__ == "__main__":
                          help="<Required> Enter the country names you are preparing for.")
     parser.add_argument('--hydro', action='store_true',
                         help="<Optional> Use the flag if you need hydropower to be considered. Default will not consider hydropower.")
+    parser.add_argument('--geothermal', action='store_true',
+                        help="<Optional> Use the flag if you need geothermal to be considered. Default will not consider geothermal.")
     parser.add_argument('-se', '--slopeexclusion', action='store_true',
                         help="<Optional> Use the flag if you have used the Slope-Exclusion submodule. Default will not consider that the Slope-Exclusion submodule has been used.")
     args = parser.parse_args()
@@ -207,8 +211,8 @@ if __name__ == "__main__":
     ocean_path = os.path.join(data_path, "GOaS_v1_20211214_gpkg", "goas_v01.gpkg")
     OSM_path = os.path.join(data_path, "OSM")
 
-    config_name = "Country_config_hydro.yml" if args.hydro else "Country_config.yml"
-    config_input_file_path = os.path.join(dirname, "inputs_spider", config_name)
+    # config_name = "Country_config_hydro.yml" if args.hydro else "Country_config.yml"
+    config_input_file_path = os.path.join(dirname, "inputs_spider", "Country_config.yml")
 
     slope_exclusion_output_path = os.path.join(dirname, "Slope-Exclusion", "output")
     glaes_data_path = os.path.join(dirname, 'glaes', 'glaes', 'data')
@@ -239,7 +243,7 @@ if __name__ == "__main__":
 
         # Optional prep step - creating hydropower geopackage file
         if args.hydro:
-            print(f"Creating Geopackage file for {country_name_clean}...")
+            print(f"Creating hydropower geopackage file for {country_name_clean}...")
             input_path = os.path.join(data_path, f"{country_name_clean}_hydropower_plants.csv") 
             output_path = os.path.join(spider_prep_data_path, f"{country_name_clean}_hydropower_dams.gpkg")
             final_data_output_path  = os.path.join(geox_final_data_path, f"{country_name_clean}_hydropower_dams.gpkg")
@@ -248,7 +252,7 @@ if __name__ == "__main__":
             data = pd.read_csv(input_path)
 
             # Select relevant columns
-            data = data[['name','lat', 'lon', 
+            data = data[['name', 'lat', 'lon', 
                         'capacity', 'head']]
 
             # Ensure numeric conversion for relevant columns
@@ -276,6 +280,39 @@ if __name__ == "__main__":
 
             print(f"GeoPackage file successfully created for {country_name_clean}\n")
 
+        # Optional prep step - creating geothermal geopackage file
+        if args.geothermal:
+            print(f"Creating geothermal geopackage file for {country_name_clean}...")
+            input_path = os.path.join(data_path, f"{country_name_clean}_geothermal_plants.csv") 
+            output_path = os.path.join(spider_prep_data_path, f"{country_name_clean}_geothermal_plants.gpkg")
+            final_data_output_path  = os.path.join(geox_final_data_path, f"{country_name_clean}_geothermal_plants.gpkg")
+            
+            # Read data from CSV
+            data = pd.read_csv(input_path)
+
+            # Select relevant columns
+            data = data[['name', 'lat', 'lon', 'capacity']]
+
+            # Ensure numeric conversion for relevant columns
+            data['lon'] = pd.to_numeric(data['lon'], errors='coerce')
+            data['lat'] = pd.to_numeric(data['lat'], errors='coerce')
+            data['capacity'] = pd.to_numeric(data['capacity'], errors='raise')
+
+            # Drop rows with missing coordinates and missing capacity
+            data = data.dropna(subset=['lon', 'lat', 'capacity'])
+
+            # Data Preparation
+            # Export GeoPackage
+            gdf = gpd.GeoDataFrame(
+                data,
+                geometry=gpd.points_from_xy(data.lon, data.lat)
+            )
+
+            gdf.set_crs(epsg=4326, inplace=True)
+            gdf.to_file(output_path, layer='plants', driver="GPKG")
+            gdf.to_file(final_data_output_path, layer='plants', driver="GPKG")
+
+            print(f"GeoPackage file successfully created for {country_name_clean}\n")
 
         # Step 1 - preparing files for glaes and spider
         print(f"Preparing spider and glaes data files for {country_name_clean}...")
@@ -367,16 +404,38 @@ if __name__ == "__main__":
         print("Finished calulcating land exclusions\n")
      
 
-        # Step 3 - creating spider config files
+        # Step 3 - creating spider config file
         print(f'Preparing config file for {country_name_clean}...')
 
+        # Adding country name to the config file
         current_data = replace_country(config_data, country_name_clean)
+
+        # Adding hydropower data if required
+        if args.hydro:
+            data = {
+                "name": "hydro",
+                "type": "vector",
+                "operation": "sjoin",
+                "file": f"data/{country_name_clean}_hydropower_dams.gpkg",
+                "joined_col": "capacity"
+            }
+
+            current_data["features"].append(data)
+        
+        # Adding geothermal data if required
+        if args.geothermal:
+            data = {
+                "name": "geothermal",
+                "type": "vector",
+                "operation": "sjoin",
+                "file": f"data/{country_name_clean}_geothermal_plants.gpkg",
+                "joined_col": "capacity"
+            }
+
+            current_data["features"].append(data)
 
         output_file = f"{country_name_clean}_config.yml"
         with open(os.path.join(spider_prep_path, output_file), 'w', encoding='utf-8') as file:
             yaml.dump(current_data, file, default_flow_style=False, allow_unicode=True)
 
         print(f'Config file is created and saved as "{output_file}"')
-
-
-

@@ -54,7 +54,7 @@ You should now have a fully functioning environment named `spider`. You can deac
 ___
 ## 2 Preparing input data
 > [!NOTE]
-> Where `COUNTRY NAME` is used, make sure to replace it with the country name spelling that matches those used in the Natural Earth country boundaries shapefile (downloaded in step 2.1).
+> Where `[COUNTRY NAME]` is used, make sure to replace it with the country name spelling that matches those used in the Natural Earth country boundaries shapefile (downloaded in step 2.1).
 
 ### 2.1 Input data
 Before running the preparation scripts, some data must be downloaded and placed in the `data` folder. 
@@ -70,22 +70,29 @@ Extra information:
 - For the files from Natural Earth Data, place the downloaded `ne_50m_admin_0_countries` folder into the `data` folder.
 
 >[!IMPORTANT]
->Ensure that the config file you are using, either `Country_config.yml` or `Country_config_hydro.yml`, located in the `inputs_spider` folder, contains all the details you want SPIDER to use. Any removal or addition of features will require modification of the Geo-X codebase.
+>Ensure that the config file, located in the `inputs_spider` folder, contains all the details you want SPIDER to use. Any removal or addition of features will require modification of the Geo-X codebase.
 
 ### 2.2 Optional input data
 #### 2.2.1 Hydropower input data
-If you want hydropower to be used as a generator, you will need another input file. In the `data` folder, there is a template that can be filled in and name updated. It should be named `[COUNTRY NAME]_hydropower_plants.csv` and kept in that folder.
+If you want hydropower to be used as a generator, you will need another input file. In the `data` folder, there is a template, `hydropower_plants.csv`, that can be filled in and name updated. It should be renamed `[COUNTRY NAME]_hydropower_plants.csv` and kept in that folder.
 
 You can also use files from open-source datasets, like the [Hydropower Database](https://github.com/energy-modelling-toolkit/hydro-power-database). You must place that file into the `data` folder, rename the file to `[COUNTRY NAME]_hydropower_plants.csv` and ensure that the required column titles match those provided in the template file. Extra columns do not need to be deleted, but they will not be taken into consideration when creating the GeoPackage file.
 
-Input Data Requirements:
-- The script is designed for datasets containing:
-  - Latitude & Longitude (plant location)
-  - Installed capacity (MW)
-  - Hydraulic head (m)
-  - Name (for user to keep track)
+The model is designed for datasets containing:
+- Latitude & Longitude (plant location)
+- Installed capacity (MW)
+- Hydraulic head (m)
+- Name (for user to keep track)
 
-#### 2.2.2 Slope-exclusion input data
+#### 2.2.2 Geothermal input data
+If you want geothermal to be used as a generator, you will need another input file. In the `data` folder, there is a template, `geothermal_plants.csv`, that can be filled in and name updated. It should be renamed `[COUNTRY NAME]_geothermal_plants.csv` and kept in that folder.
+
+The model is designed for datasets containing:
+- Latitude & Longitude (plant location)
+- Installed capacity (MW)
+- Name (for user to keep track)
+
+#### 2.2.3 Slope-exclusion input data
 Slope-exclusion requires two input data files that must be downloaded and renamed:
 - The country boundary GeoJSON file for each country can be downloaded from: [opendatasoft](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/). Place each GeoJSON file into the `Slope-Exclusion/data` folder and rename to `[COUNTRY NAME]_boundary.geojson`.
 - A 3-arc-second resolution conditioned Digital Elevation Model (DEM) file can be downloaded from: [HydroSHEDS](https://www.hydrosheds.org/hydrosheds-core-downloads). Place the downloaded conditioned DEM file, for each continent you require, in the `Slope-Exclusion/data` folder and rename to `[CONTINENT NAME]_full_dem.tif`, where `CONTINENT NAME` is the name of the continent that the TIF file contains.
@@ -97,12 +104,11 @@ Slope-exclusion requires two input data files that must be downloaded and rename
 There are two main scripts that are used, as well as the SPIDER submodule. As an optional step, the Slope-Exclusion submodule can be used before running any of the main steps to gather some input data for GLAES, which is part of the first main script. This data will be used to exlude land for solar and wind generators, based on slope.
 
 >[!IMPORTANT]
->The size of the country can affect the runs as follows:
-> - The two main scripts may take more than 10 minutes to complete.
+>The two main scripts may take more than 10 minutes to complete.
 
 ### Optional step - Slope-Exclusion
 >[!NOTE]
->This step must be repeated fully for each country that you wish to have slope exclusion files for.
+>This step must be repeated fully for each country that you wish to have Slope-Exclusion files for.
 
 Move to the `Slope-Exclusion` directory and activate the `prep` environment.
 
@@ -128,7 +134,7 @@ Copy the following command, replace `[COUNTRY NAME]` as necessary, and paste it 
 
 `.../Slope-Exclusion % python exclude_slope.py --type wind --output [COUNTRY NAME]_slope_excluded_wind.tif`
 
-The output files can be found in `Slope-Exclusion/output` and will by GLAES as input data.
+The output files are in the `Slope-Exclusion/output` folder and will be used by GLAES as input data.
 
 ### 3.1 Run initial data prep before SPIDER
 Make sure you are in the top-level folder, with the `prep` environment activated.
@@ -136,13 +142,14 @@ Make sure you are in the top-level folder, with the `prep` environment activated
 There are some arguments that you need to pass via the terminal. They are:
 - `countries`: (At least one required, `string` type) This should be the names of the countries you are preparing with a space between them. Make sure that the spellings used for country names match those used in the Natural Earth country boundaries shapefile.
 - `--hydro`: (Default is `False`, `boolean` type) Only use this flag when you want hydropower to be considered, otherwise it will not be considered.
-- `-se`: (Default is `False`, `boolean` type) Only use this flag when you have used the Slope-Exclusion submodule, otherwise it will not consider that the Slope-Exclusion submodule has been used.
+- `--geothermal`: (Default is `False`, `boolean` type) Only use this flag when you want geothermal to be considered, otherwise it will not be considered.
+- `-se`: (Default is `False`, `boolean` type) Only use this flag when you have used the Slope-Exclusion submodule, otherwise it will run as if the Slope-Exclusion submodule was not used.
 
-Take the following command, replace `[COUNTRY NAME]` and keep/remove `--hydro` and `-se` as needed, and paste it into your terminal:
+Take the following command, replace `[COUNTRY NAME]` and keep or remove `--hydro`, `--geothermal`, and `-se` as needed, and paste it into your terminal:
 
-`.../Geo-X-data-prep % python prep_before_spider.py [COUNTRY NAME] [COUNTRY NAME] --hydro -se`
+`.../Geo-X-data-prep % python prep_before_spider.py [COUNTRY NAME] [COUNTRY NAME] --hydro --geothermal -se`
 
-The above will first prepare a hydropower GeoPackage file, then pre-process the raw data, create a config file for SPIDER to use, and finally run GLAES. This will be done for each country provided.
+The above will first prepare a hydropower GeoPackage file and a geothermal GeoPackage file. Then pre-process the raw data, create a config file for SPIDER to use, and finally run GLAES. This will be done for each country provided.
 
 Remember to deactive the `prep` environment before beginning the next step.
 
@@ -180,7 +187,9 @@ The above will combine the SPIDER and GLAES files. It will then assign the speci
 
 The final file will be saved as `hex_final_[COUNTRY ISO CODE].geojson` for each country in the `inputs_geox/final_data` folder. These `hex_final_[COUNTRY ISO CODE].geojson` files can be placed into a copy of the `Geo-X` repository in the `data` folder, as the baseline input data for modelling.
 
-If you set `hydro` to True, a `[COUNTRY NAME]_hydropower_dams.gpkg` file for each country will be generated into the `inputs_geox/final_data` folder. These files must be placed into the `data/hydro` folder of your `Geo-X` repository.
+If you need hydropower to be considered, a `[COUNTRY NAME]_hydropower_dams.gpkg` file for each country can be found in the `inputs_geox/final_data` folder. These files must be placed into the `data/hydro` folder of your `Geo-X` repository and `[COUNTRY NAME]` replaced with the respective country's `ISO CODE`.
+
+Likewise, if you need geothermal to be considered, a `[COUNTRY NAME]_geothermal_plants.gpkg` file for each country can be found in the `inputs_geox/final_data` folder. These files must be placed into the `data/geothermal` folder of your `Geo-X` repository and `[COUNTRY NAME]` replaced with the respective country's `ISO CODE`.
 
 ## Additional notes (Recommended to read at least once)
 As the runs progress, you may not see all the files being generated, but rest assured they are there and taking up space. Once the runs have been completed, it's recommended to save the necessary files and review the listed folders below to delete any unnecessary files in order to free up space:
@@ -214,4 +223,3 @@ note = {Model available on Github at https://github.com/ClimateCompatibleGrowth/
 }
 ```
 ___
-
