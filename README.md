@@ -157,6 +157,7 @@ With the grid environment activated, take the following commands, replace `[COUN
 `.../Geo-X-data-prep % ogr2ogr -f GPKG ccg-spider/prep/data/[COUNTRY NAME]_grid.gpkg data/OSM/[COUNTRY NAME]/[COUNTRY NAME]_grid.osm.pbf lines -select other_tags`
 
 An example for Namibia is as follows:
+
 `.../Geo-X-data-prep % osmium tags-filter data/OSM/Namibia/Namibia-260216.osm.pbf w/power=line -o data/OSM/Namibia/Namibia_grid.osm.pbf`
 
 `.../Geo-X-data-prep % ogr2ogr -f GPKG ccg-spider/prep/data/Namibia_grid.gpkg data/OSM/Namibia/Namibia_grid.osm.pbf lines -select other_tags`
