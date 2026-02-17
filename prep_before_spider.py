@@ -64,35 +64,35 @@ def calculating_exclusions(glaes_data_path, country_name, EPSG,
     turbine_radius : integer
         Turbine radius in meters used for spacing.
     """
-    print(" - Initializing exclusion calculator...")
+    print(" - Initializing exclusion calculator")
     ec = gl.ExclusionCalculator(os.path.join(glaes_data_path, f'{country_name}.geojson'), srs=EPSG, pixelSize=100)
 
-    print(" - Applying exclusions - coast...")
+    print(" - Applying exclusions - coast")
     ec.excludeVectorType(os.path.join(glaes_data_path,  f'{country_name}_oceans.geojson'), buffer=250)
 
-    print(" - Applying exclusions - herbaceous wetland...")
+    print(" - Applying exclusions - herbaceous wetland")
     ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=90, prewarp=True)
 
-    print(" - Applying exclusions - built-up area...")
+    print(" - Applying exclusions - built-up area")
     ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=50, prewarp=True)
 
-    print(" - Applying exclusions - permanent water bodies...")
+    print(" - Applying exclusions - permanent water bodies")
     ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=80, prewarp=True)
 
-    print(" - Saving excluded areas for wind as .tif file...")
+    print(" - Saving excluded areas for wind as .tif file")
     ec.save(os.path.join(glaes_processed_path,  f'{country_name}_wind_exclusions.tif'), overwrite=True)
 
-    print(" - Distributing turbines and saving placements as .shp...")
+    print(" - Distributing turbines and saving placements as .shp")
     ec.distributeItems(separation=(turbine_radius * 10, turbine_radius * 5), axialDirection=45,
                     output=os.path.join(glaes_processed_path, f'{country_name}_turbine_placements.shp'))
 
-    print(" - Applying exclusions - agriculture...")
+    print(" - Applying exclusions - agriculture")
     ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=40, prewarp=True)
 
-    print(" - Saving excluded areas for PV as .tif file...")
+    print(" - Saving excluded areas for PV as .tif file")
     ec.save(os.path.join(glaes_processed_path, f'{country_name}_pv_exclusions.tif'), overwrite=True)
 
-    print(" - Distributing pv modules and saving placements as .shp...")
+    print(" - Distributing pv modules and saving placements as .shp")
     ec.distributeItems(separation=440, output=os.path.join(glaes_processed_path, f'{country_name}_pv_placements.shp'))
 
 def calculating_exclusions_slope_exclusion_included(glaes_data_path, 
@@ -121,41 +121,41 @@ def calculating_exclusions_slope_exclusion_included(glaes_data_path,
         Turbine radius in meters used for spacing.
     """
     for gen in ("solar", "wind"):
-        print(f" - Initializing exclusion calculator for {gen}...")
+        print(f" - Initializing exclusion calculator for {gen}")
         ec = gl.ExclusionCalculator(os.path.join(glaes_data_path,  f'{country_name}.geojson'), srs=EPSG, pixelSize=100)
 
-        print(" - Applying exclusions - coast...")
+        print(" - Applying exclusions - coast")
         ec.excludeVectorType(os.path.join(glaes_data_path,  f'{country_name}_oceans.geojson'), buffer=250)
 
-        print(" - Applying exclusions - herbaceous wetland...")
+        print(" - Applying exclusions - herbaceous wetland")
         ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=90, prewarp=True)
 
-        print(" - Applying exclusions - built-up area...")
+        print(" - Applying exclusions - built-up area")
         ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=50, prewarp=True)
         
-        print(" - Applying exclusions - permanent water bodies...")
+        print(" - Applying exclusions - permanent water bodies")
         ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=80, prewarp=True)
         if gen == "wind":
             print(" - Applying exclusions - slope")
             ec.excludeRasterType(os.path.join(slope_exclusion_output_path, f'{country_name}_slope_excluded_wind.tif'), value=1, prewarp=True)
             
-            print(" - Saving excluded areas for wind as .tif file...")
+            print(" - Saving excluded areas for wind as .tif file")
             ec.save(os.path.join(glaes_processed_path,  f'{country_name}_wind_exclusions.tif'), overwrite=True)
         
-            print(" - Distributing turbines and saving placements as .shp...")
+            print(" - Distributing turbines and saving placements as .shp")
             ec.distributeItems(separation=(turbine_radius * 10, turbine_radius * 5), axialDirection=45,
                             output=os.path.join(glaes_processed_path, f'{country_name}_turbine_placements.shp'))
         if gen == "solar":
             print(" - Applying exclusions - slope")
             ec.excludeRasterType(os.path.join(slope_exclusion_output_path, f'{country_name}_slope_excluded_pv.tif'), value=1, prewarp=True)
             
-            print(" - Applying exclusions - agriculture...")
+            print(" - Applying exclusions - agriculture")
             ec.excludeRasterType(os.path.join(glaes_data_path, f'{country_name}_CLC.tif'), value=40, prewarp=True)
             
-            print(" - Saving excluded areas for PV as .tif file...")
+            print(" - Saving excluded areas for PV as .tif file")
             ec.save(os.path.join(glaes_processed_path, f'{country_name}_pv_exclusions.tif'), overwrite=True)
             
-            print(" - Distributing pv modules and saving placements as .shp...")
+            print(" - Distributing pv modules and saving placements as .shp")
             ec.distributeItems(separation=440, output=os.path.join(glaes_processed_path, f'{country_name}_pv_placements.shp'))
 
 def replace_country(node, country_name):
@@ -192,11 +192,15 @@ if __name__ == "__main__":
     parser.add_argument('countries', nargs='+', type=str,
                          help="<Required> Enter the country names you are preparing for.")
     parser.add_argument('--hydro', action='store_true',
-                        help="<Optional> Use the flag if you need hydropower to be considered. Default will not consider hydropower.")
+                        help="<Optional> Use this flag if you need hydropower to be considered. Default will not consider hydropower.")
     parser.add_argument('--geothermal', action='store_true',
-                        help="<Optional> Use the flag if you need geothermal to be considered. Default will not consider geothermal.")
+                        help="<Optional> Use this flag if you need geothermal to be considered. Default will not consider geothermal.")
     parser.add_argument('-se', '--slopeexclusion', action='store_true',
-                        help="<Optional> Use the flag if you have used the Slope-Exclusion submodule. Default will not consider that the Slope-Exclusion submodule has been used.")
+                        help="<Optional> Use this flag if you have used the Slope-Exclusion submodule. Default will not consider that the Slope-Exclusion submodule has been used.")
+    parser.add_argument('--ocean', action='store_true',
+                        help="<Optional> Use this flag if the country being analysed is coastal to calculate ocean distances. Default will be landlocked and not consider the ocean distances.")
+    parser.add_argument('--grid', action='store_true',
+                        help="<Optional> Use this flag if analysing copper processing in Geo-X to get grid distances needed for some energy scenarios. Default will not add grid distances.")
     args = parser.parse_args()
 
     # Define country name(s) to be used
@@ -241,9 +245,9 @@ if __name__ == "__main__":
     for country_name in country_names:
         country_name_clean = clean_country_name(country_name)
 
-        # Optional prep step - creating hydropower geopackage file
+        # Optional prep step - creating hydropower GeoPackage file
         if args.hydro:
-            print(f"Creating hydropower geopackage file for {country_name_clean}...")
+            print(f"Creating hydropower GeoPackage file for {country_name_clean}")
             input_path = os.path.join(data_path, f"{country_name_clean}_hydropower_plants.csv") 
             output_path = os.path.join(spider_prep_data_path, f"{country_name_clean}_hydropower_dams.gpkg")
             final_data_output_path  = os.path.join(geox_final_data_path, f"{country_name_clean}_hydropower_dams.gpkg")
@@ -278,11 +282,11 @@ if __name__ == "__main__":
             gdf.to_file(output_path, layer='dams', driver="GPKG")
             gdf.to_file(final_data_output_path, layer='dams', driver="GPKG")
 
-            print(f"GeoPackage file successfully created for {country_name_clean}\n")
+            print(f"Hydropower file successfully created for {country_name_clean}\n")
 
-        # Optional prep step - creating geothermal geopackage file
+        # Optional prep step - creating geothermal GeoPackage file
         if args.geothermal:
-            print(f"Creating geothermal geopackage file for {country_name_clean}...")
+            print(f"Creating geothermal GeoPackage file for {country_name_clean}...")
             input_path = os.path.join(data_path, f"{country_name_clean}_geothermal_plants.csv") 
             output_path = os.path.join(spider_prep_data_path, f"{country_name_clean}_geothermal_plants.gpkg")
             final_data_output_path  = os.path.join(geox_final_data_path, f"{country_name_clean}_geothermal_plants.gpkg")
@@ -312,10 +316,10 @@ if __name__ == "__main__":
             gdf.to_file(output_path, layer='plants', driver="GPKG")
             gdf.to_file(final_data_output_path, layer='plants', driver="GPKG")
 
-            print(f"GeoPackage file successfully created for {country_name_clean}\n")
+            print(f"Geothermal file successfully created for {country_name_clean}\n")
 
         # Step 1 - preparing files for glaes and spider
-        print(f"Preparing spider and glaes data files for {country_name_clean}...")
+        print(f"Preparing spider and glaes data files for {country_name_clean}")
 
         # Grab country boundaries
         country = countries.loc[[f'{country_name_clean}'], :]
@@ -332,23 +336,24 @@ if __name__ == "__main__":
         country.to_crs(epsg=EPSG, inplace=True)
         country.to_file(os.path.join(glaes_data_path, f'{country_name_clean}.geojson'), driver='GeoJSON', encoding='utf-8')
 
-        # Buffer the "country" polygon by 1000 meters to create a buffer zone
-        country_buffer = country['geometry'].buffer(10000)
-        country_buffer.make_valid()
-        country_buffer.to_file(os.path.join(glaes_data_path, f'{country_name_clean}_buff.geojson'), driver='GeoJSON', encoding='utf-8')
+        if args.ocean:
+            # Buffer the "country" polygon by 1000 meters to create a buffer zone
+            country_buffer = country['geometry'].buffer(10000)
+            country_buffer.make_valid()
+            country_buffer.to_file(os.path.join(glaes_data_path, f'{country_name_clean}_buff.geojson'), driver='GeoJSON', encoding='utf-8')
 
-        # Reproject GOAS to UTM zone of country
-        GOAS = gpd.read_file(ocean_path)
-        country_buffer = country_buffer.to_crs(epsg=4326)
-        GOAS.to_crs(epsg=4326, inplace=True)
-        GOAS_country = gpd.clip(GOAS, country_buffer)
-        GOAS_country['geometry'].make_valid()
-        # Reconvert to country CRS? Check it makes no difference in distance outputs. GLAES seems happy with 4326.
-        GOAS_country.to_file(os.path.join(glaes_data_path, f'{country_name_clean}_oceans.geojson'), driver='GeoJSON', encoding='utf-8')
+            # Reproject GOAS to UTM zone of country
+            GOAS = gpd.read_file(ocean_path)
+            country_buffer = country_buffer.to_crs(epsg=4326)
+            GOAS.to_crs(epsg=4326, inplace=True)
+            GOAS_country = gpd.clip(GOAS, country_buffer)
+            GOAS_country['geometry'].make_valid()
+            # Reconvert to country CRS? Check it makes no difference in distance outputs. GLAES seems happy with 4326.
+            GOAS_country.to_file(os.path.join(glaes_data_path, f'{country_name_clean}_oceans.geojson'), driver='GeoJSON', encoding='utf-8')
 
-        # Calculating spider data files
-        # Save oceans to gpkg for spider
-        GOAS_country.to_file(os.path.join(spider_prep_data_path, f'{country_name_clean}_oceans.gpkg'), driver='GPKG', encoding='utf-8')
+            # Calculating spider data files
+            # Save oceans to gpkg for spider
+            GOAS_country.to_file(os.path.join(spider_prep_data_path, f'{country_name_clean}_oceans.gpkg'), driver='GPKG', encoding='utf-8')
 
         # Save OSM layers in 4236 gpkgs for spider
         OSM_country_path = os.path.join(OSM_path, f"{country_name_clean}")
@@ -385,11 +390,7 @@ if __name__ == "__main__":
 
 
         # Step 2 - running glaes
-        print(f"Calculating land exclusions for {country_name_clean}...")
-
-        # Load the pickled EPSG code for the country
-        with open(os.path.join(glaes_data_path, f'{country_name_clean}_EPSG.pkl'), 'rb') as file:
-            EPSG = pickle.load(file)
+        print(f"Calculating land exclusions for {country_name_clean}")
 
         # Chooses slope-exclusion function based on user input
         if args.slopeexclusion:
@@ -405,10 +406,38 @@ if __name__ == "__main__":
      
 
         # Step 3 - creating spider config file
-        print(f'Preparing config file for {country_name_clean}...')
+        print(f'Preparing config file for {country_name_clean}')
 
         # Adding country name to the config file
         current_data = replace_country(config_data, country_name_clean)
+
+        # Adding ocean distance data if required
+        if args.ocean:
+            data = {
+                "decimals": 3,
+                "name": "ocean_dist",
+                "type": "vector",
+                "fix":
+                    {"factor": 0.001},
+                "operation": "distance",
+                "file": f"data/{country_name_clean}_oceans.gpkg",
+            }
+
+            current_data["features"].append(data)
+
+        # Adding grid distance data if required
+        if args.grid:
+            data = {
+                "decimals": 2,
+                "name": "grid_dist",
+                "type": "vector",
+                "fix":
+                    {"factor": 0.001},
+                "operation": "distance",
+                "file": f"data/{country_name_clean}_grid.gpkg",
+            }
+
+            current_data["features"].append(data)
 
         # Adding hydropower data if required
         if args.hydro:

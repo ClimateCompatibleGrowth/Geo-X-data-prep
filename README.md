@@ -92,7 +92,11 @@ The model is designed for datasets containing:
 - Installed capacity (MW)
 - Name (for user to keep track)
 
-#### 2.2.3 Slope-exclusion input data
+#### 2.2.3 Grid input data
+If you are analysing copper processing in Geo-X, you must add the following input data in the `data/OSM/[COUNTRY NAME]/` folder and do the additional grid steps as described throughout:
+- The .osm.pbf file from https://download.geofabrik.de/ for your country
+
+#### 2.2.4 Slope-exclusion input data
 Slope-exclusion requires two input data files that must be downloaded and renamed:
 - The country boundary GeoJSON file for each country can be downloaded from: [opendatasoft](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/). Place each GeoJSON file into the `Slope-Exclusion/data` folder and rename to `[COUNTRY NAME]_boundary.geojson`.
 - A 3-arc-second resolution conditioned Digital Elevation Model (DEM) file can be downloaded from: [HydroSHEDS](https://www.hydrosheds.org/hydrosheds-core-downloads). Place the downloaded conditioned DEM file, for each continent you require, in the `Slope-Exclusion/data` folder and rename to `[CONTINENT NAME]_full_dem.tif`, where `CONTINENT NAME` is the name of the continent that the TIF file contains.
@@ -136,6 +140,27 @@ Copy the following command, replace `[COUNTRY NAME]` as necessary, and paste it 
 
 The output files are in the `Slope-Exclusion/output` folder and will be used by GLAES as input data.
 
+### Optional step - Prep grid data
+
+Install the grid environment needed to prep the grid data:
+
+`.../Geo-X-data-prep % mamba env create -f environment_grid.yaml`
+
+This new environment can be activated using:
+
+`.../Geo-X-data-prep % mamba activate grid`
+
+With the grid environment activated, take the following commands, replace `[COUNTRY NAME]` and `[FILE NAME]`, and paste it into your terminal in this order:
+
+`.../Geo-X-data-prep % osmium tags-filter data/OSM/[COUNTRY NAME]/[FILE NAME].osm.pbf w/power=line -o data/OSM/[COUNTRY NAME]/[COUNTRY NAME]_grid.osm.pbf`
+
+`.../Geo-X-data-prep % ogr2ogr -f GPKG ccg-spider/prep/data/[COUNTRY NAME]_grid.gpkg data/OSM/[COUNTRY NAME]/[COUNTRY NAME]_grid.osm.pbf lines -select other_tags`
+
+An example for Namibia is as follows:
+`.../Geo-X-data-prep % osmium tags-filter data/OSM/Namibia/Namibia-260216.osm.pbf w/power=line -o data/OSM/Namibia/Namibia_grid.osm.pbf`
+
+`.../Geo-X-data-prep % ogr2ogr -f GPKG ccg-spider/prep/data/Namibia_grid.gpkg data/OSM/Namibia/Namibia_grid.osm.pbf lines -select other_tags`
+
 ### 3.1 Run initial data prep before SPIDER
 Make sure you are in the top-level folder, with the `prep` environment activated.
 
@@ -144,10 +169,12 @@ There are some arguments that you need to pass via the terminal. They are:
 - `--hydro`: (Default is `False`, `boolean` type) Only use this flag when you want hydropower to be considered, otherwise it will not be considered.
 - `--geothermal`: (Default is `False`, `boolean` type) Only use this flag when you want geothermal to be considered, otherwise it will not be considered.
 - `-se`: (Default is `False`, `boolean` type) Only use this flag when you have used the Slope-Exclusion submodule, otherwise it will run as if the Slope-Exclusion submodule was not used.
+- `--ocean`: (Default is `False`, `boolean` type) Only use this flag when you have a country that is coastal, as ocean distances are required, otherwise it will run as if the country is landlocked.
+- `--grid`: (Default is `False`, `boolean` type) Only use this flag when you are analysing copper processing in Geo-X, as grid distances are required for some energy scenarios, otherwise it will run with calculating grid distances.
 
-Take the following command, replace `[COUNTRY NAME]` and keep or remove `--hydro`, `--geothermal`, and `-se` as needed, and paste it into your terminal:
+Take the following command, replace `[COUNTRY NAME]` and keep or remove `--hydro`, `--geothermal`, `-se`, `--ocean`, and `--grid` as needed, and paste it into your terminal:
 
-`.../Geo-X-data-prep % python prep_before_spider.py [COUNTRY NAME] [COUNTRY NAME] --hydro --geothermal -se`
+`.../Geo-X-data-prep % python prep_before_spider.py [COUNTRY NAME] [COUNTRY NAME] --hydro --geothermal -se --ocean --grid`
 
 The above will first prepare a hydropower GeoPackage file and a geothermal GeoPackage file. Then pre-process the raw data, create a config file for SPIDER to use, and finally run GLAES. This will be done for each country provided.
 
@@ -164,7 +191,7 @@ Now, you will need to move to the `ccg-spider/prep` directory, activate the `spi
 
 Take the following command, replace `[COUNTRY NAME]` with the name of the country you are studying without spaces or periods, and paste it into your terminal:
 
-`.../prep % gdal_rasterize data/[COUNTRY NAME].gpkg -burn 1 -tr 0.1 0.1 data/blank.tif && gdalwarp -t_srs EPSG:4088 data/blank.tif data/blank_proj.tif && spi --config=[COUNTRY NAME]_config.yml [COUNTRY NAME]_hex.geojson`
+`.../prep % gdal_rasterize data/[COUNTRY NAME].gpkg -burn 1 -tr 0.001 0.001 data/blank.tif && gdalwarp -t_srs EPSG:4088 -tr 100 100 data/blank.tif data/blank_proj.tif && spi --config=[COUNTRY NAME]_config.yml [COUNTRY NAME]_hex.geojson`
 
 This command must be used for **each** country separately.
 This will produce a set of hexagon tiles for each country using the parameters in the `Country_config.yml` file.

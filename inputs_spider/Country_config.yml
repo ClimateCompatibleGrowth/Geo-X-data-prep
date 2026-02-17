@@ -3,15 +3,6 @@ hex_res: 4
 raster_like: data/blank_proj.tif
 
 features:
-
-  - name: ocean_dist
-    type: vector
-    operation: distance
-    file: data/Country_oceans.gpkg
-    decimals: 3
-    fix:
-      factor: 0.001
-
   - name: waterbody_dist
     type: vector
     operation: distance
