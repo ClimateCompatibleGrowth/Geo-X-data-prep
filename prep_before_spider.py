@@ -1,7 +1,7 @@
 """
 @authors:
  - Alycia Leonard, University of Oxford, alycia.leonard@eng.ox.ac.uk
- - Samiyha Naqvi, University of Oxford, samiyha.naqvi@eng.ox.ac.uk
+ - Samiyha Naqvi
  - Lukas Schirren, Imperial College London, lukas.schirren@imperial.ac.uk
 
 This script does three main preparation steps and one optional preparation 

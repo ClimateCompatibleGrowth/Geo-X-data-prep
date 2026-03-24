@@ -1,12 +1,12 @@
 """
 @authors:
  - Alycia Leonard, University of Oxford, alycia.leonard@eng.ox.ac.uk
- - Samiyha Naqvi, University of Oxford, samiyha.naqvi@eng.ox.ac.uk
+ - Samiyha Naqvi
 
 This script does three main preparation steps:
 
 Firstly, it joins the outputs from GLAES to the hexagons produced by SPIDER for 
-input to GEO-X.
+input to Geo-X.
 The inputs are the SPIDER hex.geojson file and the GLAES pv_placements.shp and 
 turbine_placements.shp files.
 The output is a hexagon file where a count of turbine and pv installations is 

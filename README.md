@@ -93,7 +93,7 @@ The model is designed for datasets containing:
 - Name (for user to keep track)
 
 #### 2.2.3 Grid input data
-If you are analysing copper processing in Geo-X, you must add the following input data in the `data/OSM/[COUNTRY NAME]/` folder and do the additional grid steps as described throughout:
+If you are analysing copper processing in Geo-X, you must add the following input data in the `data/OSM/[COUNTRY NAME]/` folder and do the additional grid steps as described later on:
 - The .osm.pbf file from https://download.geofabrik.de/ for your country
 
 #### 2.2.4 Slope-exclusion input data
