@@ -1,7 +1,7 @@
 """
 @authors:
  - Alycia Leonard, University of Oxford, alycia.leonard@eng.ox.ac.uk
- - Samiyha Naqvi
+ - Samiyha Naqvi, University of Oxford, samiyha.naqvi@eng.ox.ac.uk
  - Lukas Schirren, Imperial College London, lukas.schirren@imperial.ac.uk
 
 This script does three main preparation steps and one optional preparation 
@@ -10,8 +10,7 @@ step.
 Optional step:
 If hydropower is required, then this script will prepare hydropower data for 
 hexagon preparation in SPIDER in the form of a GeoPackage file.
-Likewise, if geothermal is required, then this script will prepare geothermal
-data for hexagon preparation in SPIDER in the form of a GeoPackage file.
+Likewise, geothermal and nuclear data can be prepared as well.
 The outputs are saved to ccg-spider/prep/data and inputs_geox/final_data.
 
 Main steps:
@@ -23,7 +22,7 @@ The outputs are saved in glaes/data and ccg-spider/prep/data respectively.
 Secondly, using GLAES, it implements land exclusions for the countries defined 
 in the list 'country_names', and allocates PV and wind installations over the 
 allowed area.
-The outputs are saved as .shp files in input_glaes/processed.
+The outputs are saved as .shp files in inputs_glaes/processed.
 
 Lastly, this script tailors config files for each country in the 
 'country_names' list for SPIDER to use.
@@ -195,6 +194,8 @@ if __name__ == "__main__":
                         help="<Optional> Use this flag if you need hydropower to be considered. Default will not consider hydropower.")
     parser.add_argument('--geothermal', action='store_true',
                         help="<Optional> Use this flag if you need geothermal to be considered. Default will not consider geothermal.")
+    parser.add_argument('--nuclear', action='store_true',
+                        help="<Optional> Use this flag if you need nuclear to be considered. Default will not consider nuclear.")
     parser.add_argument('-se', '--slopeexclusion', action='store_true',
                         help="<Optional> Use this flag if you have used the Slope-Exclusion submodule. Default will not consider that the Slope-Exclusion submodule has been used.")
     parser.add_argument('--ocean', action='store_true',
@@ -318,6 +319,40 @@ if __name__ == "__main__":
 
             print(f"Geothermal file successfully created for {country_name_clean}\n")
 
+        # Optional prep step - creating nuclear GeoPackage file
+        if args.nuclear:
+            print(f"Creating nuclear GeoPackage file for {country_name_clean}...")
+            input_path = os.path.join(data_path, f"{country_name_clean}_nuclear_plants.csv") 
+            output_path = os.path.join(spider_prep_data_path, f"{country_name_clean}_nuclear_plants.gpkg")
+            final_data_output_path  = os.path.join(geox_final_data_path, f"{country_name_clean}_nuclear_plants.gpkg")
+            
+            # Read data from CSV
+            data = pd.read_csv(input_path)
+
+            # Select relevant columns
+            data = data[['name', 'lat', 'lon', 'capacity']]
+
+            # Ensure numeric conversion for relevant columns
+            data['lon'] = pd.to_numeric(data['lon'], errors='coerce')
+            data['lat'] = pd.to_numeric(data['lat'], errors='coerce')
+            data['capacity'] = pd.to_numeric(data['capacity'], errors='raise')
+
+            # Drop rows with missing coordinates and missing capacity
+            data = data.dropna(subset=['lon', 'lat', 'capacity'])
+
+            # Data Preparation
+            # Export GeoPackage
+            gdf = gpd.GeoDataFrame(
+                data,
+                geometry=gpd.points_from_xy(data.lon, data.lat)
+            )
+
+            gdf.set_crs(epsg=4326, inplace=True)
+            gdf.to_file(output_path, layer='plants', driver="GPKG")
+            gdf.to_file(final_data_output_path, layer='plants', driver="GPKG")
+
+            print(f"Nuclear file successfully created for {country_name_clean}\n")
+        
         # Step 1 - preparing files for glaes and spider
         print(f"Preparing spider and glaes data files for {country_name_clean}")
 
@@ -458,6 +493,18 @@ if __name__ == "__main__":
                 "type": "vector",
                 "operation": "sjoin",
                 "file": f"data/{country_name_clean}_geothermal_plants.gpkg",
+                "joined_col": "capacity"
+            }
+
+            current_data["features"].append(data)
+        
+        # Adding nuclear data if required
+        if args.nuclear:
+            data = {
+                "name": "nuclear",
+                "type": "vector",
+                "operation": "sjoin",
+                "file": f"data/{country_name_clean}_nuclear_plants.gpkg",
                 "joined_col": "capacity"
             }
 
