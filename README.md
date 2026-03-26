@@ -69,9 +69,6 @@ Extra information:
 - For the OpenStreetMap files, extract the contents from the downloaded folder into a subfolder as follows `data/OSM/[COUNTRY NAME]` for each country.
 - For the files from Natural Earth Data, place the downloaded `ne_50m_admin_0_countries` folder into the `data` folder.
 
->[!IMPORTANT]
->Ensure that the config file, located in the `inputs_spider` folder, contains all the details you want SPIDER to use. Any removal or addition of features will require modification of the Geo-X codebase.
-
 ### 2.2 Optional input data
 #### 2.2.1 Hydropower input data
 If you want hydropower to be used as a generator, you will need another input file. In the `data` folder, there is a template, `hydropower_plants.csv`, that can be filled in and name updated. It should be renamed `[COUNTRY NAME]_hydropower_plants.csv` and kept in that folder.
@@ -92,14 +89,22 @@ The model is designed for datasets containing:
 - Installed capacity (MW)
 - Name (for user to keep track)
 
-#### 2.2.3 Grid input data
+#### 2.2.3 Nuclear input data
+If you want nuclear to be used as a generator, you will need another input file. In the `data` folder, there is a template, `nuclear_plants.csv`, that can be filled in and name updated. It should be renamed `[COUNTRY NAME]_nuclear_plants.csv` and kept in that folder.
+
+The model is designed for datasets containing:
+- Latitude & Longitude (plant location)
+- Installed capacity (MW)
+- Name (for user to keep track)
+
+#### 2.2.4 Grid input data
 If you are analysing copper processing in Geo-X, you must add the following input data in the `data/OSM/[COUNTRY NAME]/` folder and do the additional grid steps as described later on:
 - The .osm.pbf file from https://download.geofabrik.de/ for your country
 
-#### 2.2.4 Slope-exclusion input data
-Slope-exclusion requires two input data files that must be downloaded and renamed:
-- The country boundary GeoJSON file for each country can be downloaded from: [opendatasoft](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/). Place each GeoJSON file into the `Slope-Exclusion/data` folder and rename to `[COUNTRY NAME]_boundary.geojson`.
-- A 3-arc-second resolution conditioned Digital Elevation Model (DEM) file can be downloaded from: [HydroSHEDS](https://www.hydrosheds.org/hydrosheds-core-downloads). Place the downloaded conditioned DEM file, for each continent you require, in the `Slope-Exclusion/data` folder and rename to `[CONTINENT NAME]_full_dem.tif`, where `CONTINENT NAME` is the name of the continent that the TIF file contains.
+#### 2.2.5 Slope-exclusion input data
+Slope-exclusion requires two input data files that must be downloaded, renamed and placed into the `Slope-Exclusion/data` folder:
+- The country boundary GeoJSON file for each country can be downloaded from: [opendatasoft](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/). Rename each country file to `[COUNTRY NAME]_boundary.geojson`.
+- A 3-arc-second resolution conditioned Digital Elevation Model (DEM) file can be downloaded from: [HydroSHEDS](https://www.hydrosheds.org/hydrosheds-core-downloads). Rename each continent file to `[CONTINENT NAME]_full_dem.tif`, where `CONTINENT NAME` is the name of the continent that the TIF file contains.
 
 >[!NOTE]
 >The above naming conventions will allow you to place several files to run for several countries. At this point, each country will have to be run separately for some steps, this is expanded on in step 3.
@@ -138,7 +143,7 @@ Copy the following command, replace `[COUNTRY NAME]` as necessary, and paste it 
 
 `.../Slope-Exclusion % python exclude_slope.py --type wind --output [COUNTRY NAME]_slope_excluded_wind.tif`
 
-The output files are in the `Slope-Exclusion/output` folder and will be used by GLAES as input data.
+The output files are in the `Slope-Exclusion/output` folder and will be used by GLAES as input data. Deactivate the `prep` environment and return to the top-level folder.
 
 ### Optional step - Prep grid data
 
@@ -169,24 +174,25 @@ There are some arguments that you need to pass via the terminal. They are:
 - `countries`: (At least one required, `string` type) This should be the names of the countries you are preparing with a space between them. Make sure that the spellings used for country names match those used in the Natural Earth country boundaries shapefile.
 - `--hydro`: (Default is `False`, `boolean` type) Only use this flag when you want hydropower to be considered, otherwise it will not be considered.
 - `--geothermal`: (Default is `False`, `boolean` type) Only use this flag when you want geothermal to be considered, otherwise it will not be considered.
+- `--nuclear`: (Default is `False`, `boolean` type) Only use this flag when you want nuclear to be considered, otherwise it will not be considered.
 - `-se`: (Default is `False`, `boolean` type) Only use this flag when you have used the Slope-Exclusion submodule, otherwise it will run as if the Slope-Exclusion submodule was not used.
 - `--ocean`: (Default is `False`, `boolean` type) Only use this flag when you have a country that is coastal, as ocean distances are required, otherwise it will run as if the country is landlocked.
 - `--grid`: (Default is `False`, `boolean` type) Only use this flag when you are analysing copper processing in Geo-X, as grid distances are required for some energy scenarios, otherwise it will run with calculating grid distances.
 
-Take the following command, replace `[COUNTRY NAME]` and keep or remove `--hydro`, `--geothermal`, `-se`, `--ocean`, and `--grid` as needed, and paste it into your terminal:
+Take the following command, replace `[COUNTRY NAME]` and keep or remove `--hydro`, `--geothermal`, `--nuclear`, `-se`, `--ocean`, and `--grid` as needed, and paste it into your terminal:
 
-`.../Geo-X-data-prep % python prep_before_spider.py [COUNTRY NAME] [COUNTRY NAME] --hydro --geothermal -se --ocean --grid`
+`.../Geo-X-data-prep % python prep_before_spider.py [COUNTRY NAME] [COUNTRY NAME] --hydro --geothermal --nuclear -se --ocean --grid`
 
-The above will first prepare a hydropower GeoPackage file and a geothermal GeoPackage file. Then pre-process the raw data, create a config file for SPIDER to use, and finally run GLAES. This will be done for each country provided.
+The above will first prepare GeoPackage files for hydropower, geothermal and nuclear, if the flags are used. Then pre-process the raw data, create a config file for SPIDER to use, and finally run GLAES. This will be done for each country provided.
 
 Remember to deactive the `prep` environment before beginning the next step.
 
 ### 3.2 Run SPIDER
 >[!IMPORTANT]
 >Before running this step, it's important to know the following:
-> - You must check that the config file is correct for each country you intend to run results for. These can be found in the `ccg-spider/prep` folder.
+> - You must check that the config file information is correct for each country you intend to run results for. These can be found in the `ccg-spider/prep` folder.
 > - The version of ccg-spider that is used is `Commit 2eed525`. We recommend using this version for Geo-X-data-prep, but you can change it to best fit your needs.
-> - Do not use multiple `&&` symbols to run more than one country at once. Only one set of `blank.tif` and `blank_proj.tif` files will be generated based on the first country, which will lead to inaccurate hexagon files for subsequent countries.
+> - Do not add multiple `&&` symbols to run more than one country at once. Only one set of `blank.tif` and `blank_proj.tif` files will be generated based on the first country, which will lead to inaccurate hexagon files for subsequent countries.
 
 Now, you will need to move to the `ccg-spider/prep` directory, activate the `spider` environment, and use the SPIDER CLI.
 
@@ -215,9 +221,11 @@ The above will combine the SPIDER and GLAES files. It will then assign the speci
 
 The final file will be saved as `hex_final_[COUNTRY ISO CODE].geojson` for each country in the `inputs_geox/final_data` folder. These `hex_final_[COUNTRY ISO CODE].geojson` files can be placed into a copy of the `Geo-X` repository in the `data` folder, as the baseline input data for modelling.
 
-If you need hydropower to be considered, a `[COUNTRY NAME]_hydropower_dams.gpkg` file for each country can be found in the `inputs_geox/final_data` folder. These files must be placed into the `data/hydro` folder of your `Geo-X` repository and `[COUNTRY NAME]` replaced with the respective country's `ISO CODE`.
+If you need hydropower to be considered, a `[COUNTRY NAME]_hydropower_dams.gpkg` file for each country can be found in the `inputs_geox/final_data` folder. These files must be placed into the `data/[COUNTRY ISO CODE]/`` folder of your `Geo-X` repository and `[COUNTRY NAME]` replaced with the respective country's `ISO CODE`.
 
-Likewise, if you need geothermal to be considered, a `[COUNTRY NAME]_geothermal_plants.gpkg` file for each country can be found in the `inputs_geox/final_data` folder. These files must be placed into the `data/geothermal` folder of your `Geo-X` repository and `[COUNTRY NAME]` replaced with the respective country's `ISO CODE`.
+Likewise, if you need geothermal to be considered, a `[COUNTRY NAME]_geothermal_plants.gpkg` file for each country can be found in the `inputs_geox/final_data` folder. These files must be placed into the `data/[COUNTRY ISO CODE]/` folder of your `Geo-X` repository and `[COUNTRY NAME]` replaced with the respective country's `ISO CODE`.
+
+Likewise, if you need nuclear to be considered, a `[COUNTRY NAME]_nuclear_plants.gpkg` file for each country can be found in the `inputs_geox/final_data` folder. These files must be placed into the `data/[COUNTRY ISO CODE]/`` folder of your `Geo-X` repository and `[COUNTRY NAME]` replaced with the respective country's `ISO CODE`.
 
 ## Additional notes (Recommended to read at least once)
 As the runs progress, you may not see all the files being generated, but rest assured they are there and taking up space. Once the runs have been completed, it's recommended to save the necessary files and review the listed folders below to delete any unnecessary files in order to free up space:
