@@ -55,10 +55,10 @@ def combine_glaes_spider(hex, wind_points, pv_points):
     wind_point_counts = spatial_join.groupby('index').size()
 
     # Merge the point counts with the 'hex' GeoDataFrame based on the index
-    hex['theo_turbines'] = wind_point_counts
+    hex['wind'] = wind_point_counts
 
     # If some polygons have no points, fill their 'point_count' with 0
-    hex['theo_turbines'] = hex['theo_turbines'].fillna(0)
+    hex['wind'] = hex['wind'].fillna(0)
 
     print(" - Joining pv locations...")
     # Spatial join the pv points to the polygons
@@ -68,10 +68,10 @@ def combine_glaes_spider(hex, wind_points, pv_points):
     pv_point_counts = spatial_join.groupby('index').size()
 
     # Merge the point counts with the 'hex' GeoDataFrame based on the index
-    hex['theo_pv'] = pv_point_counts
+    hex['solar'] = pv_point_counts
 
     # If some polygons have no points, fill their 'point_count' with 0
-    hex['theo_pv'] = hex['theo_pv'].fillna(0)
+    hex['solar'] = hex['solar'].fillna(0)
 
     return hex
 
